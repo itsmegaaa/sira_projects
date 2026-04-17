@@ -28,7 +28,12 @@ class _MandiriScreenState extends State<MandiriScreen> {
   final TextEditingController _catatanCtrl = TextEditingController();
   bool _isOnline = true;
   StreamSubscription<List<ConnectivityResult>>? _connSub;
-  final Color _warnaMandiri = Colors.blueAccent;
+
+  // Palet Warna Premium Clean UI
+  final Color navyColor = const Color(0xFF0F172A);
+  final Color goldColor = const Color(0xFFD4AF37);
+  final Color bgColor = const Color(0xFFF8FAFC);
+  final Color surfaceColor = Colors.white;
 
   @override
   void dispose() {
@@ -45,13 +50,6 @@ class _MandiriScreenState extends State<MandiriScreen> {
     });
 
     _connSub = Connectivity().onConnectivityChanged.listen((
-      List<ConnectivityResult> result,
-    ) {
-      if (mounted)
-        setState(() => _isOnline = !result.contains(ConnectivityResult.none));
-    });
-
-    Connectivity().onConnectivityChanged.listen((
       List<ConnectivityResult> result,
     ) {
       if (mounted)
@@ -124,13 +122,19 @@ class _MandiriScreenState extends State<MandiriScreen> {
         int count = await controller.imporExcel(result.files.single);
         if (mounted)
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Berhasil impor $count data!')),
+            SnackBar(
+              content: Text('Berhasil impor $count data!'),
+              backgroundColor: Colors.green,
+            ),
           );
       } catch (e) {
         if (mounted)
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Gagal impor Excel: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Gagal impor Excel: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
       }
     }
   }
@@ -149,12 +153,12 @@ class _MandiriScreenState extends State<MandiriScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
+          SnackBar(
+            content: const Text(
               'Template CSV berhasil dibuat! (PENTING: Save As ke format .xlsx sebelum diimpor)',
             ),
-            duration: Duration(seconds: 5),
-            backgroundColor: Colors.blueAccent,
+            duration: const Duration(seconds: 5),
+            backgroundColor: navyColor,
           ),
         );
       }
@@ -174,10 +178,9 @@ class _MandiriScreenState extends State<MandiriScreen> {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     final controller = context.watch<MandiriController>();
 
-    // Warna Latar Belakang Clean
-    Color bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA);
-    Color surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    Color textColor = isDark ? Colors.white : const Color(0xFF2D3142);
+    Color currentBg = isDark ? const Color(0xFF121212) : bgColor;
+    Color currentSurface = isDark ? const Color(0xFF1E1E1E) : surfaceColor;
+    Color currentText = isDark ? Colors.white : navyColor;
 
     List<OrderModel> filteredData = controller.filteredData;
     int totalSelesai = 0, totalTelat = 0, totalProses = 0, totalApproval = 0;
@@ -200,12 +203,12 @@ class _MandiriScreenState extends State<MandiriScreen> {
     bool canEdit = true;
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: currentBg,
       appBar: AppBar(
-        backgroundColor: surfaceColor,
+        backgroundColor: currentSurface,
         elevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: textColor),
+        iconTheme: IconThemeData(color: currentText),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -213,17 +216,17 @@ class _MandiriScreenState extends State<MandiriScreen> {
               'MANDIRI',
               style: TextStyle(
                 fontWeight: FontWeight.w900,
-                fontSize: 22,
-                color: textColor,
-                letterSpacing: 0.5,
+                fontSize: 20,
+                color: currentText,
+                letterSpacing: -0.5,
               ),
             ),
             Text(
-              'Manajemen Dokumen Notaris',
+              'Manajemen Berkas Notaris',
               style: TextStyle(
                 fontSize: 11,
                 color: Colors.grey.shade500,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -231,10 +234,10 @@ class _MandiriScreenState extends State<MandiriScreen> {
         actions: [
           if (canApprove)
             PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, color: textColor),
+              icon: Icon(Icons.more_vert, color: currentText),
               tooltip: 'Menu Data',
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
               ),
               onSelected: (value) {
                 if (value == 'import')
@@ -247,30 +250,30 @@ class _MandiriScreenState extends State<MandiriScreen> {
                   controller.eksporDanBagikanPDF();
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'import',
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.upload_file,
-                        color: Colors.blueAccent,
-                        size: 20,
-                      ),
-                      SizedBox(width: 12),
-                      Text(
+                      Icon(Icons.upload_file, color: goldColor, size: 20),
+                      const SizedBox(width: 12),
+                      const Text(
                         'Impor Data (Excel)',
                         style: TextStyle(fontSize: 14),
                       ),
                     ],
                   ),
                 ),
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'template',
                   child: Row(
                     children: [
-                      Icon(Icons.table_view, color: Colors.orange, size: 20),
-                      SizedBox(width: 12),
-                      Text(
+                      const Icon(
+                        Icons.table_view,
+                        color: Colors.orange,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
                         'Unduh Template Impor',
                         style: TextStyle(fontSize: 14),
                       ),
@@ -278,26 +281,34 @@ class _MandiriScreenState extends State<MandiriScreen> {
                   ),
                 ),
                 const PopupMenuDivider(),
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'csv',
                   child: Row(
                     children: [
-                      Icon(Icons.table_chart, color: Colors.green, size: 20),
-                      SizedBox(width: 12),
-                      Text(
+                      const Icon(
+                        Icons.table_chart,
+                        color: Colors.green,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
                         'Ekspor Laporan (CSV)',
                         style: TextStyle(fontSize: 14),
                       ),
                     ],
                   ),
                 ),
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'pdf',
                   child: Row(
                     children: [
-                      Icon(Icons.picture_as_pdf, color: Colors.red, size: 20),
-                      SizedBox(width: 12),
-                      Text(
+                      const Icon(
+                        Icons.picture_as_pdf,
+                        color: Colors.red,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
                         'Ekspor Laporan (PDF)',
                         style: TextStyle(fontSize: 14),
                       ),
@@ -311,7 +322,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
       drawer: _buatSideMenuBaru(controller, isDark),
 
       body: controller.sedangMemuat
-          ? Center(child: CircularProgressIndicator(color: _warnaMandiri))
+          ? Center(child: CircularProgressIndicator(color: goldColor))
           : Column(
               children: [
                 if (!_isOnline)
@@ -336,10 +347,10 @@ class _MandiriScreenState extends State<MandiriScreen> {
                     ),
                   ),
 
-                // STAT PILL & SEARCH BAR (Clean UI)
+                // STAT PILL & SEARCH BAR (Disamakan dengan Bapenda)
                 Container(
-                  color: surfaceColor,
-                  padding: const EdgeInsets.only(top: 10, bottom: 20),
+                  color: currentSurface,
+                  padding: const EdgeInsets.only(bottom: 20),
                   child: Column(
                     children: [
                       SingleChildScrollView(
@@ -431,21 +442,20 @@ class _MandiriScreenState extends State<MandiriScreen> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            Container(
-                              height: 52,
-                              width: 52,
-                              decoration: BoxDecoration(
-                                color: _warnaMandiri.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: _warnaMandiri.withOpacity(0.3),
+                            GestureDetector(
+                              onTap: () =>
+                                  _tampilkanModalFilter(context, controller),
+                              child: Container(
+                                height: 52,
+                                width: 52,
+                                decoration: BoxDecoration(
+                                  color: navyColor,
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                              ),
-                              child: IconButton(
-                                icon: Icon(Icons.tune, color: _warnaMandiri),
-                                tooltip: 'Filter Data',
-                                onPressed: () =>
-                                    _tampilkanModalFilter(context, controller),
+                                child: Icon(
+                                  Icons.tune_rounded,
+                                  color: goldColor,
+                                ),
                               ),
                             ),
                           ],
@@ -455,7 +465,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
                   ),
                 ),
 
-                // LIST ORDER MANDIRI (Clean UI)
+                // LIST ORDER MANDIRI
                 Expanded(
                   child: filteredData.isEmpty
                       ? Center(
@@ -469,7 +479,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                'Belum ada data',
+                                'Belum ada data / Tidak ditemukan',
                                 style: TextStyle(
                                   color: Colors.grey.shade500,
                                   fontSize: 16,
@@ -650,20 +660,22 @@ class _MandiriScreenState extends State<MandiriScreen> {
             await controller.simpanOrder(res);
           }
         },
-        icon: const Icon(Icons.add),
-        label: const Text(
-          'Tambah Data',
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+        icon: Icon(Icons.add_rounded, color: goldColor),
+        label: Text(
+          'TAMBAH DATA',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: goldColor,
+            letterSpacing: 1,
+          ),
         ),
-        backgroundColor: _warnaMandiri,
-        foregroundColor: Colors.white,
-        elevation: 0,
+        backgroundColor: navyColor,
+        elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
 
-  // --- FILTER MODAL (Clean UI) ---
   void _tampilkanModalFilter(
     BuildContext context,
     MandiriController controller,
@@ -689,7 +701,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
       builder: (context) => Container(
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         ),
         padding: EdgeInsets.only(
           top: 12,
@@ -703,9 +715,9 @@ class _MandiriScreenState extends State<MandiriScreen> {
           children: [
             Center(
               child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 20),
+                width: 50,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(10),
@@ -715,16 +727,32 @@ class _MandiriScreenState extends State<MandiriScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Filter Data',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                Text(
+                  'Saring Data',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: navyColor,
+                  ),
                 ),
-                TextButton(
+                TextButton.icon(
                   onPressed: () {
                     controller.resetFilter();
                     Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Filter dikembalikan ke awal'),
+                        backgroundColor: navyColor,
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
                   },
-                  child: const Text(
+                  icon: const Icon(
+                    Icons.refresh,
+                    size: 18,
+                    color: Colors.redAccent,
+                  ),
+                  label: const Text(
                     'Reset',
                     style: TextStyle(
                       color: Colors.redAccent,
@@ -734,7 +762,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const Divider(height: 30),
             Expanded(
               child: ListView(
                 physics: const BouncingScrollPhysics(),
@@ -787,13 +815,13 @@ class _MandiriScreenState extends State<MandiriScreen> {
                     onChanged: (v) => controller.setFilterDropdown(kcu: v),
                   ),
                   const SizedBox(height: 30),
-                  const Text(
+                  Text(
                     'RENTANG TANGGAL ORDER',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey,
-                      letterSpacing: 0.5,
+                      color: Colors.grey.shade500,
+                      letterSpacing: 1.0,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -803,7 +831,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: ListTile(
-                      leading: Icon(Icons.date_range, color: _warnaMandiri),
+                      leading: Icon(Icons.date_range, color: navyColor),
                       title: Text(
                         controller.filterTanggalMulai != null &&
                                 controller.filterTanggalAkhir != null
@@ -815,7 +843,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
                               ? FontWeight.bold
                               : FontWeight.normal,
                           color: controller.filterTanggalMulai != null
-                              ? _warnaMandiri
+                              ? navyColor
                               : null,
                         ),
                       ),
@@ -845,6 +873,14 @@ class _MandiriScreenState extends State<MandiriScreen> {
                           lastDate: DateTime.now().add(
                             const Duration(days: 365),
                           ),
+                          builder: (context, child) => Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme: ColorScheme.light(
+                                primary: navyColor,
+                              ),
+                            ),
+                            child: child!,
+                          ),
                         );
                         if (pickedRange != null)
                           controller.setRentangTanggal(
@@ -861,8 +897,8 @@ class _MandiriScreenState extends State<MandiriScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _warnaMandiri,
-                  foregroundColor: Colors.white,
+                  backgroundColor: navyColor,
+                  foregroundColor: goldColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -882,7 +918,6 @@ class _MandiriScreenState extends State<MandiriScreen> {
     );
   }
 
-  // --- DRAWER CLEAN UI ---
   Widget _buatSideMenuBaru(MandiriController controller, bool isDark) {
     return Drawer(
       backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
@@ -891,16 +926,16 @@ class _MandiriScreenState extends State<MandiriScreen> {
           Container(
             padding: const EdgeInsets.fromLTRB(24, 60, 24, 30),
             width: double.infinity,
-            color: _warnaMandiri.withOpacity(0.1),
+            color: navyColor,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  backgroundColor: _warnaMandiri,
+                  backgroundColor: goldColor,
                   radius: 30,
-                  child: const Icon(
+                  child: Icon(
                     Icons.account_balance,
-                    color: Colors.white,
+                    color: navyColor,
                     size: 30,
                   ),
                 ),
@@ -909,28 +944,28 @@ class _MandiriScreenState extends State<MandiriScreen> {
                   controller.userEmail.isEmpty
                       ? 'Memuat...'
                       : controller.userEmail,
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: _warnaMandiri.withOpacity(0.2),
+                    color: Colors.white.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     'Akses: ${controller.userRole}',
                     style: TextStyle(
-                      color: _warnaMandiri,
+                      color: goldColor,
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
@@ -942,13 +977,14 @@ class _MandiriScreenState extends State<MandiriScreen> {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 10),
+              physics: const BouncingScrollPhysics(),
               children: [
                 _buildDrawerTitle('NAVIGASI'),
-                _buildDrawerItem(Icons.home_outlined, 'Beranda', () {
+                _buildDrawerItem(Icons.home_rounded, 'Beranda Utama', () {
                   Navigator.pop(context);
                   Navigator.pop(context);
                 }),
-                _buildDrawerItem(Icons.domain, 'Bapenda', () {
+                _buildDrawerItem(Icons.domain_rounded, 'Pindah ke Bapenda', () {
                   Navigator.pop(context);
                   Navigator.pushReplacement(
                     context,
@@ -961,19 +997,19 @@ class _MandiriScreenState extends State<MandiriScreen> {
                   padding: EdgeInsets.symmetric(horizontal: 24),
                   child: Divider(height: 30),
                 ),
-
                 _buildDrawerTitle('AKTIVITAS & BANTUAN'),
                 _buildDrawerItem(
                   Icons.history,
-                  'Riwayat Aktivitas Mandiri',
+                  'Riwayat Aktivitas Notaris',
                   () {
                     Navigator.pop(context);
                     _tampilkanRiwayatLog();
                   },
+                  iconColor: Colors.orange,
                 ),
                 _buildDrawerItem(
                   Icons.settings_outlined,
-                  'Pengaturan',
+                  'Pengaturan Target SLA',
                   () async {
                     Navigator.pop(context);
                     await Navigator.push(
@@ -993,12 +1029,12 @@ class _MandiriScreenState extends State<MandiriScreen> {
             padding: const EdgeInsets.all(16.0),
             child: ListTile(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
               tileColor: Colors.red.withOpacity(0.05),
               leading: const Icon(Icons.logout, color: Colors.red),
               title: const Text(
-                'Log Out',
+                'Keluar Aplikasi',
                 style: TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
@@ -1040,25 +1076,21 @@ class _MandiriScreenState extends State<MandiriScreen> {
   }) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-      leading: Icon(icon, color: iconColor ?? Colors.grey.shade600, size: 22),
+      leading: Icon(icon, color: iconColor ?? navyColor, size: 22),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
       ),
       onTap: onTap,
     );
   }
 
-  // --- DETAIL MODAL (Clean UI) ---
   void _tampilkanDetail(OrderModel item) {
     _catatanCtrl.clear();
     final controller = context.read<MandiriController>();
     String umurStr = 'SELESAI';
-
-    if (item.progres != 'SELESAI' && item.tglOrder != null) {
+    if (item.progres != 'SELESAI' && item.tglOrder != null)
       umurStr = '${DateTime.now().difference(item.tglOrder!).inDays} Hari';
-    }
-
     bool isAdmin = controller.userRole == 'ADMIN';
     bool isPIC = controller.userRole == 'PIC';
     bool canApprove = isAdmin || isPIC;
@@ -1071,7 +1103,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
       builder: (context) => Container(
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         ),
         padding: EdgeInsets.only(
           top: 12,
@@ -1084,9 +1116,9 @@ class _MandiriScreenState extends State<MandiriScreen> {
           children: [
             Center(
               child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 20),
+                width: 50,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(10),
@@ -1096,9 +1128,13 @@ class _MandiriScreenState extends State<MandiriScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Detail Order',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: navyColor,
+                  ),
                 ),
                 Row(
                   children: [
@@ -1106,15 +1142,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
                       icon: const Icon(Icons.share, color: Colors.green),
                       onPressed: () {
                         String text =
-                            "📄 *DETAIL ORDER NOTARIS*\n\n"
-                            "👤 *Debitur:* ${item.debitur}\n"
-                            "🏦 *KCU/KCP:* ${item.kcu}\n"
-                            "⚖️ *Notaris:* ${item.notaris}\n"
-                            "📖 *No. Covernote:* ${item.covernote}\n"
-                            "📑 *Jenis:* ${item.jenis}\n"
-                            "💰 *Limit:* Rp ${_formatRupiah(item.limit)}\n"
-                            "📌 *Status:* ${item.progres}\n"
-                            "👨‍💼 *PIC Internal:* ${item.picInternal}";
+                            "📄 *DETAIL ORDER NOTARIS*\n\n👤 *Debitur:* ${item.debitur}\n🏦 *KCU/KCP:* ${item.kcu}\n⚖️ *Notaris:* ${item.notaris}\n📖 *No. Covernote:* ${item.covernote}\n📑 *Jenis:* ${item.jenis}\n📝 *Rincian:* ${item.rincian}\n💰 *Limit:* Rp ${_formatRupiah(item.limit)}\n🧾 *Biaya:* Rp ${_formatRupiah(item.biaya)}\n\n📌 *Status:* ${item.progres}\n📅 *Tgl Order:* ${_formatTanggal(item.tglOrder)}\n⏳ *Deadline:* ${_formatTanggal(item.deadline)}\n📝 *Catatan:* ${item.note.isEmpty ? '-' : item.note}\n\n👨‍💼 *PIC Internal:* ${item.picInternal}";
                         Share.share(text);
                       },
                     ),
@@ -1123,8 +1151,8 @@ class _MandiriScreenState extends State<MandiriScreen> {
                         icon: const Icon(Icons.edit, size: 16),
                         label: const Text('Edit'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent.withOpacity(0.1),
-                          foregroundColor: Colors.blueAccent,
+                          backgroundColor: navyColor.withOpacity(0.1),
+                          foregroundColor: navyColor,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -1151,7 +1179,6 @@ class _MandiriScreenState extends State<MandiriScreen> {
               ],
             ),
             const Divider(height: 30),
-
             if (item.progres == 'MENUNGGU APPROVAL' && canApprove)
               Container(
                 width: double.infinity,
@@ -1191,7 +1218,6 @@ class _MandiriScreenState extends State<MandiriScreen> {
                   },
                 ),
               ),
-
             Expanded(
               child: ListView(
                 physics: const BouncingScrollPhysics(),
@@ -1234,18 +1260,15 @@ class _MandiriScreenState extends State<MandiriScreen> {
                     padding: EdgeInsets.symmetric(vertical: 8),
                     child: Divider(thickness: 2),
                   ),
-
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      'Update Kendala',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                  Text(
+                    'Update Kendala',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.grey.shade500,
                     ),
                   ),
+                  const SizedBox(height: 12),
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
@@ -1266,10 +1289,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(
-                            Icons.send,
-                            color: Colors.blueAccent,
-                          ),
+                          icon: Icon(Icons.send, color: navyColor),
                           onPressed: () => _tambahHistori(item.id),
                         ),
                       ],
@@ -1307,7 +1327,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
                             margin: const EdgeInsets.only(bottom: 10),
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.05),
+                              color: navyColor.withOpacity(0.05),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Column(
@@ -1321,7 +1341,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
                                       : 'Baru',
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: Colors.blue.shade700,
+                                    color: navyColor,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -1357,16 +1377,16 @@ class _MandiriScreenState extends State<MandiriScreen> {
       builder: (context) => Container(
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         ),
         padding: const EdgeInsets.all(24),
         height: MediaQuery.of(context).size.height * 0.8,
         child: Column(
           children: [
             Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
+              width: 50,
+              height: 5,
+              margin: const EdgeInsets.only(bottom: 24),
               decoration: BoxDecoration(
                 color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(10),
@@ -1375,17 +1395,21 @@ class _MandiriScreenState extends State<MandiriScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Riwayat Aktivitas',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: navyColor,
+                  ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(Icons.close, color: Colors.grey),
                 ),
               ],
             ),
-            const Divider(),
+            const Divider(height: 30),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
@@ -1509,7 +1533,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.grey.shade500,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -1562,24 +1586,22 @@ class _MandiriScreenState extends State<MandiriScreen> {
     );
   }
 
-  Widget _buildEmptyLog() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.history_toggle_off, size: 60, color: Colors.grey.shade200),
-          const SizedBox(height: 16),
-          Text(
-            'Belum ada riwayat aktivitas.',
-            style: TextStyle(
-              color: Colors.grey.shade400,
-              fontWeight: FontWeight.bold,
-            ),
+  Widget _buildEmptyLog() => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.history_toggle_off, size: 60, color: Colors.grey.shade200),
+        const SizedBox(height: 16),
+        Text(
+          'Belum ada riwayat aktivitas.',
+          style: TextStyle(
+            color: Colors.grey.shade400,
+            fontWeight: FontWeight.bold,
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
 
   Widget _barisDetail(String label, dynamic nilai) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6.0),

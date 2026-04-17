@@ -9,97 +9,216 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isPasswordVisible = false;
   bool _isLoading = false;
-  bool _sembunyikanPassword = true;
 
-  @override
-  void dispose() {
-    _emailCtrl.dispose();
-    _passCtrl.dispose();
-    super.dispose();
-  }
+  // Palet Warna Premium SIRA
+  final Color navyColor = const Color(0xFF0F172A);
+  final Color goldColor = const Color(0xFFD4AF37);
+  final Color bgColor = const Color(0xFFF8FAFC);
 
-  Future<void> _login() async {
-    if (_emailCtrl.text.isEmpty || _passCtrl.text.isEmpty) {
+  Future<void> _handleLogin() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Email dan Password harus diisi!'),
-          backgroundColor: Colors.red,
-        ),
+        const SnackBar(content: Text('Email dan Password wajib diisi!')),
       );
       return;
     }
 
     setState(() => _isLoading = true);
     try {
-      // Perintah menembak server Firebase
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailCtrl.text.trim(),
-        password: _passCtrl.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
       );
-      // Jika sukses, aplikasi akan otomatis berpindah ke Beranda berkat AuthGate di main.dart
     } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
+      String message = 'Terjadi kesalahan login.';
+      if (e.code == 'user-not-found')
+        message = 'Email tidak terdaftar.';
+      else if (e.code == 'wrong-password')
+        message = 'Password salah.';
 
-      String pesanError = 'Gagal Login: ${e.message}';
-
-      if (e.code == 'user-not-found' ||
-          e.code == 'wrong-password' ||
-          e.code == 'invalid-credential') {
-        pesanError = 'Email atau Password salah.';
-      } else if (e.code == 'network-request-failed') {
-        pesanError = 'Tidak ada koneksi internet. Periksa sinyal Anda.';
-      }
-
-      // Tampilkan notifikasi (TIDAK PERLU setState di sini karena sudah ada di finally)
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(pesanError), backgroundColor: Colors.red),
-      );
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Terjadi kesalahan sistem: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+        );
       }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _lupaPassword() async {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Lupa Password?',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: const Text(
-          'Karena Anda menggunakan akun internal, silakan hubungi Admin untuk mereset password Anda.',
-          style: TextStyle(color: Colors.black54, height: 1.5),
-        ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: Stack(
+        children: [
+          // Background Decor (Aksen Navy di bagian atas)
+          Container(
+            height: MediaQuery.of(context).size.height * 0.4,
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              // Tambahkan const di sini jika ingin performa lebih baik
+              color: Color(0xFF0F172A),
+              borderRadius: BorderRadius.only(bottomRight: Radius.circular(80)),
             ),
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Tutup',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+          ),
+
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                children: [
+                  const SizedBox(height: 60),
+
+                  // ==========================================
+                  // 1. LOGO & NAMA APLIKASI (SIRA)
+                  // ==========================================
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: goldColor.withOpacity(0.5),
+                        width: 2,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.account_balance_rounded,
+                      color: goldColor,
+                      size: 50,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'SIRA',
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 4.0,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Sistem Informasi Riwayat Administrasi',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: goldColor.withOpacity(0.8),
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+
+                  const SizedBox(height: 50),
+
+                  // ==========================================
+                  // 2. KARTU LOGIN (ROUNDED 30PX)
+                  // ==========================================
+                  Container(
+                    padding: const EdgeInsets.all(30),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 25,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Selamat Datang',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: navyColor,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Silakan masuk untuk mengelola administrasi.',
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // Input Email
+                        _buildTextField(
+                          controller: _emailController,
+                          label: 'Email',
+                          icon: Icons.alternate_email_rounded,
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Input Password
+                        _buildTextField(
+                          controller: _passwordController,
+                          label: 'Password',
+                          icon: Icons.lock_outline_rounded,
+                          isPassword: true,
+                          isPasswordVisible: _isPasswordVisible,
+                          onTogglePassword: () {
+                            setState(
+                              () => _isPasswordVisible = !_isPasswordVisible,
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        // Tombol Login
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: navyColor,
+                              foregroundColor: goldColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 0,
+                            ),
+                            onPressed: _isLoading ? null : _handleLogin,
+                            child: _isLoading
+                                ? CircularProgressIndicator(color: goldColor)
+                                : const Text(
+                                    'MASUK',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Footer Branding
+                  Text(
+                    'SIRA v2.0.0 Premium Build',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
           ),
@@ -108,175 +227,65 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : Colors.white,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 32.0,
-              vertical: 24.0,
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    bool isPassword = false,
+    bool isPasswordVisible = false,
+    VoidCallback? onTogglePassword,
+    TextInputType? keyboardType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey.shade400,
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: isPassword && !isPasswordVisible,
+          keyboardType: keyboardType,
+          style: TextStyle(fontWeight: FontWeight.bold, color: navyColor),
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: navyColor, size: 20),
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(
+                      isPasswordVisible
+                          ? Icons.visibility_off_rounded
+                          : Icons.visibility_rounded,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
+                    onPressed: onTogglePassword,
+                  )
+                : null,
+            filled: true,
+            fillColor: Colors.grey.shade50,
+            contentPadding: const EdgeInsets.symmetric(vertical: 18),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // --- BAGIAN HEADER / LOGO ---
-                Center(
-                  child: Image.asset(
-                    'assets/icon.png',
-                    height: 120,
-                    width: 120,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                const SizedBox(height: 10), // Jarak napas yang lega
-                // --- TEKS JUDUL ---
-                Text(
-                  'Selamat Datang',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // --- FORM EMAIL ---
-                TextField(
-                  controller: _emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(fontSize: 15),
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    labelStyle: const TextStyle(color: Colors.grey),
-                    prefixIcon: const Icon(
-                      Icons.email_outlined,
-                      color: Colors.blueAccent,
-                      size: 22,
-                    ),
-                    filled: true,
-                    fillColor: isDark
-                        ? Colors.grey.shade900
-                        : Colors.grey.shade50,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                    // Border saat tidak fokus
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
-                    ),
-                    // Border saat sedang mengetik
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(
-                        color: Colors.blueAccent,
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // --- FORM PASSWORD ---
-                TextField(
-                  controller: _passCtrl,
-                  obscureText: _sembunyikanPassword,
-                  style: const TextStyle(fontSize: 15),
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    labelStyle: const TextStyle(color: Colors.grey),
-                    prefixIcon: const Icon(
-                      Icons.lock_outline,
-                      color: Colors.blueAccent,
-                      size: 22,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _sembunyikanPassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        color: Colors.grey,
-                        size: 22,
-                      ),
-                      onPressed: () => setState(
-                        () => _sembunyikanPassword = !_sembunyikanPassword,
-                      ),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey.shade50,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(
-                        color: Colors.blueAccent,
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // --- LUPA PASSWORD (Opsional tapi bikin keren) ---
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _lupaPassword,
-                    child: const Text(
-                      'Lupa Password?',
-                      style: TextStyle(
-                        color: Colors.blueAccent,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // --- TOMBOL MASUK ---
-                SizedBox(
-                  height: 55, // Tombol sedikit lebih tebal agar mudah ditekan
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
-                      elevation: 0, // Dibuat flat (tanpa bayangan) agar modern
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ), // Sudut membulat serasi dengan input
-                    ),
-                    onPressed: _isLoading ? null : _login,
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.5,
-                            ),
-                          )
-                        : const Text(
-                            'MASUK',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.0,
-                            ),
-                          ),
-                  ),
-                ),
-              ],
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.grey.shade200),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: navyColor, width: 1.5),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

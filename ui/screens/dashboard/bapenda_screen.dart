@@ -9,7 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:gabut_tracker/controllers/bapenda_controller.dart';
-import 'package:gabut_tracker/ui/screens/dashboard/log_bapenda_screen.dart'; // Import Riwayat Log
+import 'package:gabut_tracker/ui/screens/dashboard/log_bapenda_screen.dart';
 import 'package:gabut_tracker/ui/screens/form/form_bapenda_screen.dart';
 import 'package:gabut_tracker/ui/screens/dashboard/mandiri_screen.dart';
 import './pengaturan_screen.dart';
@@ -22,7 +22,11 @@ class BapendaScreen extends StatefulWidget {
 }
 
 class _BapendaScreenState extends State<BapendaScreen> {
-  final Color _warnaBapenda = const Color.fromARGB(255, 202, 175, 51);
+  // Palet Warna Premium Clean UI
+  final Color navyColor = const Color(0xFF0F172A);
+  final Color goldColor = const Color(0xFFD4AF37);
+  final Color bgColor = const Color(0xFFF8FAFC);
+  final Color surfaceColor = Colors.white;
 
   @override
   void initState() {
@@ -51,7 +55,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
               'Template CSV berhasil dibuat! (PENTING: Save As ke format .xlsx sebelum diimpor)',
             ),
             duration: const Duration(seconds: 5),
-            backgroundColor: _warnaBapenda,
+            backgroundColor: navyColor,
           ),
         );
       }
@@ -72,18 +76,17 @@ class _BapendaScreenState extends State<BapendaScreen> {
     final controller = context.watch<BapendaController>();
     bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Warna Latar Belakang Clean
-    Color bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA);
-    Color surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    Color textColor = isDark ? Colors.white : const Color(0xFF2D3142);
+    Color currentBg = isDark ? const Color(0xFF121212) : bgColor;
+    Color currentSurface = isDark ? const Color(0xFF1E1E1E) : surfaceColor;
+    Color currentText = isDark ? Colors.white : navyColor;
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: currentBg,
       appBar: AppBar(
-        backgroundColor: surfaceColor,
+        backgroundColor: currentSurface,
         elevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: textColor),
+        iconTheme: IconThemeData(color: currentText),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -91,9 +94,9 @@ class _BapendaScreenState extends State<BapendaScreen> {
               'BAPENDA',
               style: TextStyle(
                 fontWeight: FontWeight.w900,
-                fontSize: 22,
-                color: textColor,
-                letterSpacing: 0.5,
+                fontSize: 20,
+                color: currentText,
+                letterSpacing: -0.5,
               ),
             ),
             Text(
@@ -101,17 +104,17 @@ class _BapendaScreenState extends State<BapendaScreen> {
               style: TextStyle(
                 fontSize: 11,
                 color: Colors.grey.shade500,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
         ),
         actions: [
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, color: textColor),
+            icon: Icon(Icons.more_vert, color: currentText),
             tooltip: 'Menu Data',
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
             ),
             onSelected: (value) async {
               if (value == 'import') {
@@ -129,12 +132,18 @@ class _BapendaScreenState extends State<BapendaScreen> {
                         .imporExcelBapenda(result.files.single);
                     if (context.mounted)
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Berhasil impor $count data!')),
+                        SnackBar(
+                          content: Text('Berhasil impor $count data!'),
+                          backgroundColor: Colors.green,
+                        ),
                       );
                   } catch (e) {
                     if (context.mounted)
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Gagal impor Excel: $e')),
+                        SnackBar(
+                          content: Text('Gagal impor Excel: $e'),
+                          backgroundColor: Colors.red,
+                        ),
                       );
                   }
                 }
@@ -147,27 +156,30 @@ class _BapendaScreenState extends State<BapendaScreen> {
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'import',
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.upload_file,
-                      color: Color.fromARGB(255, 202, 175, 51),
-                      size: 20,
+                    Icon(Icons.upload_file, color: goldColor, size: 20),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Impor Data (Excel)',
+                      style: TextStyle(fontSize: 14),
                     ),
-                    SizedBox(width: 12),
-                    Text('Impor Data (Excel)', style: TextStyle(fontSize: 14)),
                   ],
                 ),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'template',
                 child: Row(
                   children: [
-                    Icon(Icons.table_view, color: Colors.orange, size: 20),
-                    SizedBox(width: 12),
-                    Text(
+                    const Icon(
+                      Icons.table_view,
+                      color: Colors.orange,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
                       'Unduh Template Impor',
                       style: TextStyle(fontSize: 14),
                     ),
@@ -175,26 +187,34 @@ class _BapendaScreenState extends State<BapendaScreen> {
                 ),
               ),
               const PopupMenuDivider(),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'csv',
                 child: Row(
                   children: [
-                    Icon(Icons.table_chart, color: Colors.green, size: 20),
-                    SizedBox(width: 12),
-                    Text(
+                    const Icon(
+                      Icons.table_chart,
+                      color: Colors.green,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
                       'Ekspor Laporan (CSV)',
                       style: TextStyle(fontSize: 14),
                     ),
                   ],
                 ),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'pdf',
                 child: Row(
                   children: [
-                    Icon(Icons.picture_as_pdf, color: Colors.red, size: 20),
-                    SizedBox(width: 12),
-                    Text(
+                    const Icon(
+                      Icons.picture_as_pdf,
+                      color: Colors.red,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
                       'Ekspor Laporan (PDF)',
                       style: TextStyle(fontSize: 14),
                     ),
@@ -207,13 +227,13 @@ class _BapendaScreenState extends State<BapendaScreen> {
       ),
       drawer: _buatSideMenuBaru(controller, isDark),
       body: controller.sedangMemuat
-          ? Center(child: CircularProgressIndicator(color: _warnaBapenda))
+          ? Center(child: CircularProgressIndicator(color: goldColor))
           : Column(
               children: [
-                // SEARCH & FILTER BAR (Clean UI)
+                // SEARCH & FILTER BAR
                 Container(
-                  color: surfaceColor,
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                  color: currentSurface,
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   child: Row(
                     children: [
                       Expanded(
@@ -227,7 +247,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                           ),
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: 'Cari debitur atau developer...',
+                              hintText: 'Cari Debitur atau Developer...',
                               hintStyle: TextStyle(
                                 color: Colors.grey.shade500,
                                 fontSize: 14,
@@ -246,28 +266,23 @@ class _BapendaScreenState extends State<BapendaScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Container(
-                        height: 52,
-                        width: 52,
-                        decoration: BoxDecoration(
-                          color: _warnaBapenda.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: _warnaBapenda.withOpacity(0.3),
+                      GestureDetector(
+                        onTap: () => _tampilkanModalFilter(context, controller),
+                        child: Container(
+                          height: 52,
+                          width: 52,
+                          decoration: BoxDecoration(
+                            color: navyColor,
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        ),
-                        child: IconButton(
-                          icon: Icon(Icons.tune, color: _warnaBapenda),
-                          tooltip: 'Filter Data',
-                          onPressed: () =>
-                              _tampilkanModalFilter(context, controller),
+                          child: Icon(Icons.tune_rounded, color: goldColor),
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                // LIST BAPENDA (Clean UI)
+                // LIST BAPENDA
                 Expanded(
                   child: controller.listFiltered.isEmpty
                       ? Center(
@@ -281,7 +296,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                'Belum ada data',
+                                'Belum ada data / Tidak ditemukan',
                                 style: TextStyle(
                                   color: Colors.grey.shade500,
                                   fontSize: 16,
@@ -312,7 +327,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                   color: isDark
                                       ? Colors.red.withOpacity(0.2)
                                       : const Color(0xFFFFECEC),
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(30),
                                   border: Border.all(
                                     color: isDark
                                         ? Colors.red.shade900
@@ -336,13 +351,13 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       title: const Text(
-                                        'Hapus Data?',
+                                        'Hapus Data Bapenda?',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       content: Text(
-                                        'Hapus berkas milik "${item.namaDebitur}" secara permanen?',
+                                        'Anda yakin ingin menghapus berkas milik "${item.namaDebitur}" secara permanen?',
                                       ),
                                       actions: [
                                         TextButton(
@@ -388,9 +403,9 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                          'Data ${item.namaDebitur} dihapus!',
+                                          'Data ${item.namaDebitur} berhasil dihapus!',
                                         ),
-                                        behavior: SnackBarBehavior.floating,
+                                        backgroundColor: Colors.redAccent,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
                                             10,
@@ -429,7 +444,9 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                           context,
                                         ).showSnackBar(
                                           const SnackBar(
-                                            content: Text('Menyimpan...'),
+                                            content: Text(
+                                              'Menyimpan pembaruan...',
+                                            ),
                                           ),
                                         );
                                       await bapendaCtrl.simpanData(
@@ -441,7 +458,9 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                           context,
                                         ).showSnackBar(
                                           const SnackBar(
-                                            content: Text('Data diperbarui!'),
+                                            content: Text(
+                                              'Data Bapenda diperbarui!',
+                                            ),
                                             backgroundColor: Colors.green,
                                           ),
                                         );
@@ -459,10 +478,10 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                 },
                                 child: Container(
                                   margin: const EdgeInsets.only(bottom: 16),
-                                  padding: const EdgeInsets.all(18),
+                                  padding: const EdgeInsets.all(20),
                                   decoration: BoxDecoration(
-                                    color: surfaceColor,
-                                    borderRadius: BorderRadius.circular(20),
+                                    color: currentSurface,
+                                    borderRadius: BorderRadius.circular(30),
                                     border: isDark
                                         ? Border.all(
                                             color: Colors.grey.shade800,
@@ -473,9 +492,9 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                     boxShadow: [
                                       if (!isDark)
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.02),
+                                          color: Colors.black.withOpacity(0.03),
                                           blurRadius: 15,
-                                          offset: const Offset(0, 5),
+                                          offset: const Offset(0, 8),
                                         ),
                                     ],
                                   ),
@@ -493,9 +512,9 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                             child: Text(
                                               item.namaDebitur,
                                               style: TextStyle(
-                                                fontWeight: FontWeight.bold,
+                                                fontWeight: FontWeight.w900,
                                                 fontSize: 16,
-                                                color: textColor,
+                                                color: currentText,
                                               ),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
@@ -511,7 +530,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                               decoration: BoxDecoration(
                                                 color: Colors.grey.shade100,
                                                 borderRadius:
-                                                    BorderRadius.circular(6),
+                                                    BorderRadius.circular(8),
                                               ),
                                               child: Text(
                                                 item.tglBayar,
@@ -540,7 +559,8 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                                   : item.developer,
                                               style: TextStyle(
                                                 fontSize: 13,
-                                                color: Colors.grey.shade600,
+                                                color: Colors.grey.shade500,
+                                                fontWeight: FontWeight.w600,
                                               ),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
@@ -550,7 +570,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                       ),
                                       const Padding(
                                         padding: EdgeInsets.symmetric(
-                                          vertical: 14,
+                                          vertical: 16,
                                         ),
                                         child: Divider(height: 1, thickness: 1),
                                       ),
@@ -563,6 +583,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                             item.nilaiBphtb,
                                             item.progresBphtb,
                                           ),
+                                          const SizedBox(width: 20),
                                           _buildInfoColumn(
                                             'PPH',
                                             item.nilaiPph,
@@ -592,14 +613,14 @@ class _BapendaScreenState extends State<BapendaScreen> {
           if (res != null) {
             try {
               if (mounted)
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Menyimpan...')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Menyimpan data baru...')),
+                );
               await bapendaCtrl.simpanData(res);
               if (mounted)
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Data berhasil disimpan!'),
+                    content: Text('Data Bapenda berhasil disimpan!'),
                     backgroundColor: Colors.green,
                   ),
                 );
@@ -618,20 +639,22 @@ class _BapendaScreenState extends State<BapendaScreen> {
             }
           }
         },
-        icon: const Icon(Icons.add),
-        label: const Text(
-          'Tambah Data',
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+        icon: Icon(Icons.add_rounded, color: goldColor),
+        label: Text(
+          'TAMBAH DATA',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: goldColor,
+            letterSpacing: 1,
+          ),
         ),
-        backgroundColor: _warnaBapenda,
-        foregroundColor: Colors.white,
-        elevation: 0, // Clean UI FAB
+        backgroundColor: navyColor,
+        elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
 
-  // --- WIDGET HELPER UNTUK KOLOM INFO (CLEAN UI) ---
   Widget _buildInfoColumn(String title, String value, String status) {
     bool isSelesai = status.toLowerCase().contains('selesai');
     Color statusColor = isSelesai ? Colors.green : Colors.orange.shade700;
@@ -648,7 +671,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                   fontSize: 11,
                   color: Colors.grey.shade500,
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+                  letterSpacing: 1.0,
                 ),
               ),
               const SizedBox(width: 6),
@@ -656,7 +679,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   status.toUpperCase(),
@@ -669,10 +692,10 @@ class _BapendaScreenState extends State<BapendaScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             value == 'MBR' ? 'MBR' : (value.isEmpty ? 'Rp 0' : 'Rp $value'),
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -681,7 +704,6 @@ class _BapendaScreenState extends State<BapendaScreen> {
     );
   }
 
-  // --- FILTER MODAL (Sesuai Bawaan dengan sedikit perapihan radius) ---
   void _tampilkanModalFilter(
     BuildContext context,
     BapendaController controller,
@@ -705,7 +727,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
       builder: (context) => Container(
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         ),
         padding: EdgeInsets.only(
           top: 12,
@@ -719,9 +741,9 @@ class _BapendaScreenState extends State<BapendaScreen> {
           children: [
             Center(
               child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 20),
+                width: 50,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(10),
@@ -731,16 +753,32 @@ class _BapendaScreenState extends State<BapendaScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Filter Data',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                Text(
+                  'Saring Data',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: navyColor,
+                  ),
                 ),
-                TextButton(
+                TextButton.icon(
                   onPressed: () {
                     controller.resetFilter();
                     Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Filter dikembalikan ke awal'),
+                        backgroundColor: navyColor,
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
                   },
-                  child: const Text(
+                  icon: const Icon(
+                    Icons.refresh,
+                    size: 18,
+                    color: Colors.redAccent,
+                  ),
+                  label: const Text(
                     'Reset',
                     style: TextStyle(
                       color: Colors.redAccent,
@@ -750,7 +788,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const Divider(height: 30),
             Expanded(
               child: ListView(
                 physics: const BouncingScrollPhysics(),
@@ -790,13 +828,13 @@ class _BapendaScreenState extends State<BapendaScreen> {
                     onChanged: (v) => controller.setFilterDropdown(progres: v),
                   ),
                   const SizedBox(height: 30),
-                  const Text(
+                  Text(
                     'RENTANG TANGGAL BAYAR',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey,
-                      letterSpacing: 0.5,
+                      color: Colors.grey.shade500,
+                      letterSpacing: 1.0,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -806,7 +844,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: ListTile(
-                      leading: Icon(Icons.date_range, color: _warnaBapenda),
+                      leading: Icon(Icons.date_range, color: navyColor),
                       title: Text(
                         controller.filterTanggalMulai != null &&
                                 controller.filterTanggalAkhir != null
@@ -818,7 +856,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                               ? FontWeight.bold
                               : FontWeight.normal,
                           color: controller.filterTanggalMulai != null
-                              ? _warnaBapenda
+                              ? navyColor
                               : null,
                         ),
                       ),
@@ -849,7 +887,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
                           builder: (context, child) => Theme(
                             data: Theme.of(context).copyWith(
                               colorScheme: ColorScheme.light(
-                                primary: _warnaBapenda,
+                                primary: navyColor,
                               ),
                             ),
                             child: child!,
@@ -870,8 +908,8 @@ class _BapendaScreenState extends State<BapendaScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _warnaBapenda,
-                  foregroundColor: Colors.white,
+                  backgroundColor: navyColor,
+                  foregroundColor: goldColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -891,7 +929,6 @@ class _BapendaScreenState extends State<BapendaScreen> {
     );
   }
 
-  // --- DRAWER CLEAN UI ---
   Widget _buatSideMenuBaru(BapendaController controller, bool isDark) {
     final userEmail = FirebaseAuth.instance.currentUser?.email ?? 'Memuat...';
 
@@ -902,64 +939,60 @@ class _BapendaScreenState extends State<BapendaScreen> {
           Container(
             padding: const EdgeInsets.fromLTRB(24, 60, 24, 30),
             width: double.infinity,
-            color: _warnaBapenda.withOpacity(0.1),
+            color: navyColor,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  backgroundColor: _warnaBapenda,
+                  backgroundColor: goldColor,
                   radius: 30,
-                  child: const Icon(
+                  child: Icon(
                     Icons.account_balance,
-                    color: Colors.white,
+                    color: navyColor,
                     size: 30,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   userEmail,
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 FutureBuilder<DocumentSnapshot>(
                   future: FirebaseFirestore.instance
                       .collection('users')
                       .doc(userEmail)
                       .get(),
                   builder: (context, snapshot) {
-                    String role = 'Memuat...'; // Teks awal saat masih loading
-
+                    String role = 'Memuat...';
                     if (snapshot.connectionState == ConnectionState.done) {
                       if (snapshot.hasData && snapshot.data!.exists) {
                         final data =
                             snapshot.data!.data() as Map<String, dynamic>?;
-                        role =
-                            data?['role'] ??
-                            'STAFF'; // Ambil role dari Firestore
+                        role = data?['role'] ?? 'STAFF';
                       } else {
-                        role = 'STAFF'; // Default jika data tidak ditemukan
+                        role = 'STAFF';
                       }
                     }
-
                     return Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: _warnaBapenda.withOpacity(0.2),
+                        color: Colors.white.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         'Akses: $role',
                         style: TextStyle(
-                          color: _warnaBapenda,
+                          color: goldColor,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
@@ -967,21 +1000,22 @@ class _BapendaScreenState extends State<BapendaScreen> {
                     );
                   },
                 ),
-              ], // 👆 =================================== 👆              ],
+              ],
             ),
           ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 10),
+              physics: const BouncingScrollPhysics(),
               children: [
                 _buildDrawerTitle('NAVIGASI'),
                 _buildDrawerItem(
-                  Icons.home_outlined,
-                  'Beranda',
+                  Icons.home_rounded,
+                  'Beranda Utama',
                   () =>
                       Navigator.of(context).popUntil((route) => route.isFirst),
                 ),
-                _buildDrawerItem(Icons.domain, 'Mandiri', () {
+                _buildDrawerItem(Icons.domain_rounded, 'Pindah ke Mandiri', () {
                   Navigator.pop(context);
                   Navigator.pushReplacement(
                     context,
@@ -996,19 +1030,15 @@ class _BapendaScreenState extends State<BapendaScreen> {
                 ),
 
                 _buildDrawerTitle('SISTEM'),
-                _buildDrawerItem(
-                  Icons.history,
-                  'Riwayat Aktivitas Bapenda',
-                  () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LogBapendaScreen(),
-                      ),
-                    );
-                  },
-                ),
+                _buildDrawerItem(Icons.history, 'Riwayat Aktivitas', () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LogBapendaScreen(),
+                    ),
+                  );
+                }, iconColor: Colors.orange),
                 _buildDrawerItem(
                   Icons.settings_outlined,
                   'Pengaturan',
@@ -1031,12 +1061,12 @@ class _BapendaScreenState extends State<BapendaScreen> {
             padding: const EdgeInsets.all(16.0),
             child: ListTile(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
               tileColor: Colors.red.withOpacity(0.05),
               leading: const Icon(Icons.logout, color: Colors.red),
               title: const Text(
-                'Log Out',
+                'Keluar Aplikasi',
                 style: TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
@@ -1078,10 +1108,10 @@ class _BapendaScreenState extends State<BapendaScreen> {
   }) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-      leading: Icon(icon, color: iconColor ?? Colors.grey.shade600, size: 22),
+      leading: Icon(icon, color: iconColor ?? navyColor, size: 22),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
       ),
       onTap: onTap,
     );

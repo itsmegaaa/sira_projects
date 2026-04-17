@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
 import 'package:gabut_tracker/controllers/form_mandiri_controller.dart';
 import 'package:gabut_tracker/data/repositories/mandiri_repository.dart';
 
@@ -25,6 +24,12 @@ class FormMandiriScreen extends StatefulWidget {
 class _FormOrderScreenState extends State<FormMandiriScreen> {
   final _formKey = GlobalKey<FormState>();
   late final FormMandiriController _c;
+
+  // Palet Warna Premium (Navy & Gold)
+  final Color navyColor = const Color(0xFF0F172A);
+  final Color goldColor = const Color(0xFFD4AF37);
+  final Color bgColor = const Color(0xFFF8FAFC);
+  final Color surfaceColor = Colors.white;
 
   @override
   void initState() {
@@ -50,6 +55,12 @@ class _FormOrderScreenState extends State<FormMandiriScreen> {
       initialDate: initialDate ?? now,
       firstDate: firstDate ?? DateTime(2000),
       lastDate: DateTime(2100),
+      builder: (context, child) => Theme(
+        data: Theme.of(
+          context,
+        ).copyWith(colorScheme: ColorScheme.light(primary: navyColor)),
+        child: child!,
+      ),
     );
     if (picked != null) onPicked(picked);
   }
@@ -57,9 +68,12 @@ class _FormOrderScreenState extends State<FormMandiriScreen> {
   void _simpanData() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lengkapi form yang wajib diisi!'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('Lengkapi form yang wajib diisi!'),
+          backgroundColor: Colors.redAccent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
       return;
@@ -94,7 +108,7 @@ class _FormOrderScreenState extends State<FormMandiriScreen> {
                   'Data dengan No. Surat atau Debitur di tanggal yang sama kemungkinan sudah ada di database.\n\nApakah Anda yakin ingin tetap menyimpannya?',
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 actions: [
                   TextButton(
@@ -111,6 +125,9 @@ class _FormOrderScreenState extends State<FormMandiriScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange.shade700,
                       foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     onPressed: () => Navigator.pop(context, true),
                     child: const Text('TETAP SIMPAN'),
@@ -125,324 +142,256 @@ class _FormOrderScreenState extends State<FormMandiriScreen> {
     }
 
     if (!mounted) return;
-
     final dataOrder = _c.siapkanDataSimpan(widget.dataAwal?['id']);
     Navigator.pop(context, dataOrder);
-  }
-
-  Widget _buildTextField(
-    String label,
-    TextEditingController controller, {
-    bool isNumber = false,
-    bool isRequired = false,
-    bool isUpperCase = false,
-    bool isTitleCase = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: TextFormField(
-        controller: controller,
-        textCapitalization: isUpperCase
-            ? TextCapitalization.characters
-            : (isTitleCase
-                  ? TextCapitalization.words
-                  : TextCapitalization.none),
-        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        inputFormatters: [
-          if (isUpperCase) UpperCaseTextFormatter(),
-          if (isTitleCase) TitleCaseTextFormatter(),
-          if (isNumber) CurrencyFormatIdr(),
-        ],
-        decoration: InputDecoration(
-          labelText: isRequired ? '$label *' : label,
-          isDense: true,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          prefixText: isNumber ? 'Rp ' : null,
-          filled: true,
-          fillColor: Theme.of(context).brightness == Brightness.dark
-              ? Colors.grey.shade800
-              : Colors.grey.shade50,
-        ),
-        validator: (value) => isRequired && (value == null || value.isEmpty)
-            ? '$label wajib diisi'
-            : null,
-      ),
-    );
-  }
-
-  Widget _buildDateRow(String label, DateTime? date, VoidCallback onTap) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: label,
-            isDense: true,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            filled: true,
-            fillColor: Theme.of(context).brightness == Brightness.dark
-                ? Colors.grey.shade800
-                : Colors.grey.shade50,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                date != null
-                    ? DateFormat('dd MMM yyyy').format(date)
-                    : 'Pilih Tanggal',
-                style: const TextStyle(fontSize: 16),
-              ),
-              const Icon(
-                Icons.calendar_month,
-                color: Colors.blueAccent,
-                size: 20,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionCard(String title, IconData icon, List<Widget> children) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: Colors.blueAccent, size: 22),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueAccent,
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 24, thickness: 1),
-            ...children,
-          ],
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     bool isEdit = widget.dataAwal != null;
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+    Color currentBg = isDark ? const Color(0xFF121212) : bgColor;
+    Color currentSurface = isDark ? const Color(0xFF1E1E1E) : surfaceColor;
+    Color currentText = isDark ? Colors.white : navyColor;
 
     return Scaffold(
+      backgroundColor: currentBg,
       appBar: AppBar(
         title: Text(
-          isEdit ? 'Edit Data Order' : 'Input Order Baru',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          isEdit ? 'Edit Data Mandiri' : 'Input Order Baru',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 18,
+            color: currentText,
+            letterSpacing: -0.5,
+          ),
         ),
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
+        backgroundColor: currentSurface,
+        foregroundColor: currentText,
         elevation: 0,
+        centerTitle: true,
       ),
-      body: Container(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.black12
-            : Colors.grey.shade100,
-        child: Form(
-          key: _formKey,
-          child: AnimatedBuilder(
-            animation: _c,
-            builder: (context, child) {
-              // FITUR BARU: Tampilkan Loading saat menarik Master Data
-              if (_c.isLoading) {
-                return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text(
-                        "Menyiapkan Formulir...",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
+      body: Form(
+        key: _formKey,
+        child: AnimatedBuilder(
+          animation: _c,
+          builder: (context, child) {
+            if (_c.isLoading) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: goldColor),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Menyiapkan Formulir...",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade600,
                       ),
-                    ],
-                  ),
-                );
-              }
+                    ),
+                  ],
+                ),
+              );
+            }
 
-              // Logika pengunci status dropdown
-              bool isInputBaru = widget.dataAwal == null;
-              bool isLockedByRole =
-                  widget.userRole != 'ADMIN' &&
-                  (_c.progresPilihan == 'MENUNGGU APPROVAL' ||
-                      _c.progresPilihan == 'DRAFT');
-              bool kunciDropdownStatus = isInputBaru || isLockedByRole;
+            bool isInputBaru = widget.dataAwal == null;
+            bool isLockedByRole =
+                widget.userRole != 'ADMIN' &&
+                (_c.progresPilihan == 'MENUNGGU APPROVAL' ||
+                    _c.progresPilihan == 'DRAFT');
+            bool kunciDropdownStatus = isInputBaru || isLockedByRole;
 
-              return ListView(
-                padding: const EdgeInsets.all(16.0),
-                children: [
-                  _buildSectionCard(
-                    'Informasi Pihak Terkait',
-                    Icons.people_alt,
-                    [
-                      _buildTextField(
-                        'Nama Debitur',
-                        _c.debiturCtrl,
-                        isRequired: true,
-                        isUpperCase: true,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: Autocomplete<String>(
-                          optionsBuilder: (TextEditingValue t) => t.text == ''
-                              ? const Iterable<String>.empty()
-                              : _c.saranNotaris.where(
-                                  (o) => o.toLowerCase().contains(
-                                    t.text.toLowerCase(),
-                                  ),
+            return ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _buildSectionCard(
+                  title: 'PIHAK TERKAIT',
+                  icon: Icons.people_alt_rounded,
+                  isDark: isDark,
+                  currentSurface: currentSurface,
+                  currentText: currentText,
+                  children: [
+                    _buildTextField(
+                      'Nama Debitur',
+                      _c.debiturCtrl,
+                      isRequired: true,
+                      isUpperCase: true,
+                      isDark: isDark,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Autocomplete<String>(
+                        optionsBuilder: (TextEditingValue t) => t.text == ''
+                            ? const Iterable<String>.empty()
+                            : _c.saranNotaris.where(
+                                (o) => o.toLowerCase().contains(
+                                  t.text.toLowerCase(),
                                 ),
-                          onSelected: (String s) => _c.notarisCtrl.text = s,
-                          fieldViewBuilder:
-                              (ctx, ctrl, focusNode, onFieldSubmitted) {
-                                if (ctrl.text.isEmpty &&
-                                    _c.notarisCtrl.text.isNotEmpty)
-                                  ctrl.text = _c.notarisCtrl.text;
-                                return TextFormField(
-                                  controller: ctrl,
-                                  focusNode: focusNode,
-                                  decoration: InputDecoration(
-                                    labelText: 'Nama Notaris *',
-                                    isDense: true,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                              ),
+                        onSelected: (String s) => _c.notarisCtrl.text = s,
+                        fieldViewBuilder:
+                            (ctx, ctrl, focusNode, onFieldSubmitted) {
+                              if (ctrl.text.isEmpty &&
+                                  _c.notarisCtrl.text.isNotEmpty)
+                                ctrl.text = _c.notarisCtrl.text;
+                              return TextFormField(
+                                controller: ctrl,
+                                focusNode: focusNode,
+                                decoration: InputDecoration(
+                                  labelText: 'Nama Notaris *',
+                                  suffixIcon: const Icon(
+                                    Icons.search,
+                                    size: 20,
+                                  ),
+                                  filled: true,
+                                  fillColor: isDark
+                                      ? Colors.grey.shade800
+                                      : Colors.grey.shade50,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide(
+                                      color: navyColor,
+                                      width: 1.5,
                                     ),
-                                    suffixIcon: const Icon(
-                                      Icons.search,
-                                      size: 18,
-                                    ),
-                                    filled: true,
-                                    fillColor:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.grey.shade800
-                                        : Colors.grey.shade50,
-                                  ),
-                                  onChanged: (val) => _c.notarisCtrl.text = val,
-                                  validator: (value) =>
-                                      value == null || value.trim().isEmpty
-                                      ? 'Nama Notaris wajib diisi'
-                                      : null,
-                                );
-                              },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: DropdownButtonFormField<String>(
-                          value: _c.kcuPilihan,
-                          decoration: InputDecoration(
-                            labelText: 'KCU / KCP',
-                            isDense: true,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? Colors.grey.shade800
-                                : Colors.grey.shade50,
-                          ),
-                          hint: const Text('Pilih KCU'),
-                          items: _c.listKcu
-                              .map(
-                                (val) => DropdownMenuItem(
-                                  value: val,
-                                  child: Text(
-                                    val,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                              )
-                              .toList(),
-                          onChanged: (val) => _c.setKcu(val),
-                        ),
+                                onChanged: (val) => _c.notarisCtrl.text = val,
+                                validator: (value) =>
+                                    value == null || value.trim().isEmpty
+                                    ? 'Nama Notaris wajib diisi'
+                                    : null,
+                              );
+                            },
                       ),
-                      _buildTextField(
-                        'PIC Bank',
-                        _c.picBankCtrl,
-                        isRequired: true,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: DropdownButtonFormField<String>(
-                          value: _c.picInternalPilihan,
-                          decoration: InputDecoration(
-                            labelText: 'PIC Internal / Akad',
-                            isDense: true,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? Colors.grey.shade800
-                                : Colors.grey.shade50,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: DropdownButtonFormField<String>(
+                        value: _c.kcuPilihan,
+                        decoration: InputDecoration(
+                          labelText: 'KCU / KCP',
+                          filled: true,
+                          fillColor: isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade50,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
                           ),
-                          hint: const Text('Pilih PIC'),
-                          items: _c.listPicInternal
-                              .map(
-                                (val) => DropdownMenuItem(
-                                  value: val,
-                                  child: Text(val),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (val) => _c.setPicInternal(val),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: navyColor,
+                              width: 1.5,
+                            ),
+                          ),
                         ),
+                        hint: const Text('Pilih KCU'),
+                        items: _c.listKcu
+                            .map(
+                              (val) => DropdownMenuItem(
+                                value: val,
+                                child: Text(
+                                  val,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) => _c.setKcu(val),
                       ),
-                    ],
-                  ),
+                    ),
+                    _buildTextField(
+                      'PIC Bank',
+                      _c.picBankCtrl,
+                      isRequired: true,
+                      isDark: isDark,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: DropdownButtonFormField<String>(
+                        value: _c.picInternalPilihan,
+                        decoration: InputDecoration(
+                          labelText: 'PIC Internal / Akad',
+                          filled: true,
+                          fillColor: isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade50,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: navyColor,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                        hint: const Text('Pilih PIC'),
+                        items: _c.listPicInternal
+                            .map(
+                              (val) => DropdownMenuItem(
+                                value: val,
+                                child: Text(val),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) => _c.setPicInternal(val),
+                      ),
+                    ),
+                  ],
+                ),
 
-                  _buildSectionCard('Detail Surat & Waktu', Icons.description, [
+                _buildSectionCard(
+                  title: 'DETAIL SURAT & WAKTU',
+                  icon: Icons.description_rounded,
+                  isDark: isDark,
+                  currentSurface: currentSurface,
+                  currentText: currentText,
+                  children: [
                     _buildTextField(
                       'No. Surat Order',
                       _c.noSuratCtrl,
                       isUpperCase: true,
                       isRequired: true,
+                      isDark: isDark,
                     ),
                     _buildTextField(
                       'No. Covernote',
                       _c.covernoteCtrl,
                       isUpperCase: true,
                       isRequired: true,
+                      isDark: isDark,
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
+                      padding: const EdgeInsets.only(bottom: 16.0),
                       child: DropdownButtonFormField<String>(
                         value: _c.jenisPilihan,
                         decoration: InputDecoration(
                           labelText: 'Jenis Order',
-                          isDense: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
                           filled: true,
-                          fillColor:
-                              Theme.of(context).brightness == Brightness.dark
+                          fillColor: isDark
                               ? Colors.grey.shade800
                               : Colors.grey.shade50,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: navyColor,
+                              width: 1.5,
+                            ),
+                          ),
                         ),
                         hint: const Text('Pilih Jenis'),
                         items: _c.listJenisOrder
@@ -463,6 +412,7 @@ class _FormOrderScreenState extends State<FormMandiriScreen> {
                             ? 'SHM'
                             : _c.rincianCtrl.text,
                       isTitleCase: true,
+                      isDark: isDark,
                     ),
                     _buildDateRow(
                       'Tgl. Order',
@@ -471,6 +421,7 @@ class _FormOrderScreenState extends State<FormMandiriScreen> {
                         _c.tglOrder,
                         (dt) => _c.updateTglOrder(dt, widget.targetSLADefault),
                       ),
+                      isDark: isDark,
                     ),
                     _buildDateRow(
                       'Tgl. Pelaksanaan',
@@ -480,120 +431,283 @@ class _FormOrderScreenState extends State<FormMandiriScreen> {
                         (dt) => _c.updateTglPelaksanaan(dt),
                         firstDate: _c.tglOrder,
                       ),
+                      isDark: isDark,
                     ),
                     _buildDateRow(
                       'Batas SLA (Deadline)',
                       _c.deadline,
                       () =>
                           _pickDate(_c.deadline, (dt) => _c.updateDeadline(dt)),
+                      isDark: isDark,
                     ),
-                  ]),
+                  ],
+                ),
 
-                  _buildSectionCard('Finansial', Icons.monetization_on, [
+                _buildSectionCard(
+                  title: 'FINANSIAL',
+                  icon: Icons.monetization_on_rounded,
+                  isDark: isDark,
+                  currentSurface: currentSurface,
+                  currentText: currentText,
+                  children: [
                     _buildTextField(
                       'Limit Kredit',
                       _c.limitCtrl,
                       isNumber: true,
                       isRequired: true,
+                      isDark: isDark,
                     ),
                     _buildTextField(
                       'Nilai Hak Tanggungan (HT)',
                       _c.nilaiHTCtrl,
                       isNumber: true,
+                      isDark: isDark,
                     ),
                     _buildTextField(
                       'Biaya Notaris',
                       _c.biayaCtrl,
                       isNumber: true,
+                      isDark: isDark,
                     ),
-                  ]),
+                  ],
+                ),
 
-                  _buildSectionCard(
-                    'Status & Laporan',
-                    Icons.assignment_turned_in,
-                    [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: DropdownButtonFormField<String>(
-                          value: _c.progresPilihan,
-                          decoration: InputDecoration(
-                            labelText: 'Status Pekerjaan',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                _buildSectionCard(
+                  title: 'STATUS & LAPORAN',
+                  icon: Icons.assignment_turned_in_rounded,
+                  isDark: isDark,
+                  currentSurface: currentSurface,
+                  currentText: currentText,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: DropdownButtonFormField<String>(
+                        value: _c.progresPilihan,
+                        decoration: InputDecoration(
+                          labelText: 'Status Pekerjaan',
+                          filled: true,
+                          fillColor: kunciDropdownStatus
+                              ? Colors.grey.withOpacity(0.2)
+                              : (isDark
+                                    ? Colors.grey.shade800
+                                    : Colors.grey.shade50),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: navyColor,
+                              width: 1.5,
                             ),
-                            filled: true,
-                            fillColor: kunciDropdownStatus
-                                ? Colors.grey.withOpacity(0.2)
-                                : (Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.grey.shade800
-                                      : Colors.grey.shade50),
-                          ),
-                          onChanged: kunciDropdownStatus
-                              ? null
-                              : (v) => _c.setProgres(v!),
-                          items: _c.listProgres
-                              .map(
-                                (p) =>
-                                    DropdownMenuItem(value: p, child: Text(p)),
-                              )
-                              .toList(),
-                        ),
-                      ),
-
-                      _buildTextField(
-                        'Detail Progres (Contoh: SKMHT)',
-                        _c.progresKeteranganCtrl,
-                      ),
-
-                      // TANGGAL BAST HANYA MUNCUL SAAT EDIT DATA
-                      if (!isInputBaru)
-                        _buildDateRow(
-                          'Tanggal BAST',
-                          _c.tglBAST,
-                          () => _pickDate(
-                            _c.tglBAST,
-                            (dt) => _c.updateTglBAST(dt),
                           ),
                         ),
-
-                      _buildTextField(
-                        'Catatan / Per Kasus',
-                        _c.perKasusCtrl,
-                        isUpperCase: true,
-                      ),
-                      _buildTextField(
-                        'Kekurangan Berkas',
-                        _c.noteCtrl,
-                        isUpperCase: true,
-                      ),
-                    ],
-                  ),
-
-                  ElevatedButton.icon(
-                    onPressed: _simpanData,
-                    icon: const Icon(Icons.save),
-                    label: Text(
-                      isEdit ? 'Simpan Perubahan' : 'Simpan Data Baru',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        onChanged: kunciDropdownStatus
+                            ? null
+                            : (v) => _c.setProgres(v!),
+                        items: _c.listProgres
+                            .map(
+                              (p) => DropdownMenuItem(value: p, child: Text(p)),
+                            )
+                            .toList(),
                       ),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    _buildTextField(
+                      'Detail Progres (Contoh: SKMHT)',
+                      _c.progresKeteranganCtrl,
+                      isDark: isDark,
+                    ),
+                    if (!isInputBaru)
+                      _buildDateRow(
+                        'Tanggal BAST',
+                        _c.tglBAST,
+                        () =>
+                            _pickDate(_c.tglBAST, (dt) => _c.updateTglBAST(dt)),
+                        isDark: isDark,
                       ),
-                      elevation: 4,
+                    _buildTextField(
+                      'Catatan / Per Kasus',
+                      _c.perKasusCtrl,
+                      isUpperCase: true,
+                      isDark: isDark,
+                    ),
+                    _buildTextField(
+                      'Kekurangan Berkas',
+                      _c.noteCtrl,
+                      isUpperCase: true,
+                      isDark: isDark,
+                    ),
+                  ],
+                ),
+
+                ElevatedButton.icon(
+                  onPressed: _simpanData,
+                  icon: Icon(Icons.save_rounded, color: goldColor),
+                  label: Text(
+                    isEdit ? 'SIMPAN PERUBAHAN' : 'SIMPAN DATA BARU',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: goldColor,
+                      letterSpacing: 1.0,
                     ),
                   ),
-                  const SizedBox(height: 30),
-                ],
-              );
-            },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    backgroundColor: navyColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    elevation: 4,
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // --- WIDGET HELPER KARTU & INPUT (CLEAN UI) ---
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+    required bool isDark,
+    required Color currentSurface,
+    required Color currentText,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: currentSurface,
+        borderRadius: BorderRadius.circular(24),
+        border: isDark ? Border.all(color: Colors.grey.shade800) : null,
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: goldColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: goldColor, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  color: currentText,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Divider(height: 1),
+          ),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    bool isNumber = false,
+    bool isRequired = false,
+    bool isUpperCase = false,
+    bool isTitleCase = false,
+    required bool isDark,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: TextFormField(
+        controller: controller,
+        textCapitalization: isUpperCase
+            ? TextCapitalization.characters
+            : (isTitleCase
+                  ? TextCapitalization.words
+                  : TextCapitalization.none),
+        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+        inputFormatters: [
+          if (isUpperCase) UpperCaseTextFormatter(),
+          if (isTitleCase) TitleCaseTextFormatter(),
+          if (isNumber) CurrencyFormatIdr(),
+        ],
+        decoration: InputDecoration(
+          labelText: isRequired ? '$label *' : label,
+          prefixText: isNumber ? 'Rp ' : null,
+          filled: true,
+          fillColor: isDark ? Colors.grey.shade800 : Colors.grey.shade50,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: navyColor, width: 1.5),
+          ),
+        ),
+        validator: (value) => isRequired && (value == null || value.isEmpty)
+            ? '$label wajib diisi'
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildDateRow(
+    String label,
+    DateTime? date,
+    VoidCallback onTap, {
+    required bool isDark,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: label,
+            filled: true,
+            fillColor: isDark ? Colors.grey.shade800 : Colors.grey.shade50,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                date != null
+                    ? DateFormat('dd MMM yyyy').format(date)
+                    : 'Pilih Tanggal',
+                style: const TextStyle(fontSize: 15),
+              ),
+              Icon(Icons.calendar_month_rounded, color: navyColor, size: 22),
+            ],
           ),
         ),
       ),
