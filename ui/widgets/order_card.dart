@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:gabut_tracker/data/models/mandiri_model.dart'; // IMPORT MODEL
+import 'package:sira_projects/data/models/mandiri_model.dart'; // IMPORT MODEL
 
 class OrderCard extends StatelessWidget {
   final OrderModel item; // MENGGUNAKAN ORDERMODEL

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Tambahan untuk akses langsung KCU
-import 'package:gabut_tracker/controllers/master_data_controller.dart';
-import 'package:gabut_tracker/data/repositories/master_data_repository.dart';
+import 'package:sira_projects/controllers/master_data_controller.dart';
+import 'package:sira_projects/data/repositories/master_data_repository.dart';
 
 class MasterDataScreen extends StatefulWidget {
   const MasterDataScreen({super.key});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gabut_tracker/data/repositories/master_data_repository.dart';
+import 'package:sira_projects/data/repositories/master_data_repository.dart';
 
 class MasterDataController extends ChangeNotifier {
   final MasterDataRepository repo;

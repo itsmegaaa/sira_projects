@@ -13,9 +13,9 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-import 'package:gabut_tracker/core/utils/notifikasi_service.dart';
-import 'package:gabut_tracker/data/repositories/mandiri_repository.dart';
-import 'package:gabut_tracker/data/models/mandiri_model.dart'; // IMPORT MODEL
+import 'package:sira_projects/core/utils/notifikasi_service.dart';
+import 'package:sira_projects/data/repositories/mandiri_repository.dart';
+import 'package:sira_projects/data/models/mandiri_model.dart'; // IMPORT MODEL
 
 class MandiriController extends ChangeNotifier {
   final MandiriRepository _repo;

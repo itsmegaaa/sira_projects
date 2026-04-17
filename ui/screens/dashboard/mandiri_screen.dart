@@ -10,13 +10,13 @@ import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:gabut_tracker/data/models/mandiri_model.dart';
-import 'package:gabut_tracker/ui/screens/form/form_mandiri_screen.dart';
-import 'package:gabut_tracker/ui/screens/dashboard/bapenda_screen.dart';
+import 'package:sira_projects/data/models/mandiri_model.dart';
+import 'package:sira_projects/ui/screens/form/form_mandiri_screen.dart';
+import 'package:sira_projects/ui/screens/dashboard/bapenda_screen.dart';
 import './pengaturan_screen.dart';
-import 'package:gabut_tracker/controllers/mandiri_controller.dart';
-import 'package:gabut_tracker/ui/widgets/order_card.dart';
-import 'package:gabut_tracker/ui/widgets/stat_pill.dart';
+import 'package:sira_projects/controllers/mandiri_controller.dart';
+import 'package:sira_projects/ui/widgets/order_card.dart';
+import 'package:sira_projects/ui/widgets/stat_pill.dart';
 
 class MandiriScreen extends StatefulWidget {
   const MandiriScreen({super.key});

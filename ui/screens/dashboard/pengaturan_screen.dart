@@ -10,9 +10,9 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:gabut_tracker/core/utils/globals.dart';
-import 'package:gabut_tracker/data/repositories/mandiri_repository.dart';
-import 'package:gabut_tracker/ui/screens/admin/master_data_screen.dart'; // Import layar Master Data
+import 'package:sira_projects/core/utils/globals.dart';
+import 'package:sira_projects/data/repositories/mandiri_repository.dart';
+import 'package:sira_projects/ui/screens/admin/master_data_screen.dart'; // Import layar Master Data
 
 class HalamanPengaturan extends StatefulWidget {
   const HalamanPengaturan({super.key});
