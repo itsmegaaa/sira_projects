@@ -18,9 +18,9 @@ class MasterDataController extends ChangeNotifier {
 
     // Mengambil data secara paralel agar lebih cepat
     final results = await Future.wait([
-      repo.getListItems('list_kcu'),
-      repo.getListItems('list_notaris'),
-      repo.getListItems('list_pic_internal'),
+      repo.getListItems('kcu'), // Disesuaikan
+      repo.getListItems('notaris'), // 👈 UBAH KE 'notaris'
+      repo.getListItems('pic'), // 👈 UBAH KE 'pic'
     ]);
 
     listKcu = results[0]..sort();
@@ -35,9 +35,9 @@ class MasterDataController extends ChangeNotifier {
     if (value.isEmpty) return;
 
     List<String> targetList;
-    if (docId == 'list_kcu')
+    if (docId == 'kcu' || docId == 'list_kcu')
       targetList = listKcu;
-    else if (docId == 'list_notaris')
+    else if (docId == 'notaris') // 👈 UBAH LOGIKANYA DI SINI
       targetList = listNotaris;
     else
       targetList = listPic;
@@ -52,9 +52,9 @@ class MasterDataController extends ChangeNotifier {
 
   Future<void> hapusItem(String docId, String value) async {
     List<String> targetList;
-    if (docId == 'list_kcu')
+    if (docId == 'kcu' || docId == 'list_kcu')
       targetList = listKcu;
-    else if (docId == 'list_notaris')
+    else if (docId == 'notaris') // 👈 UBAH LOGIKANYA DI SINI
       targetList = listNotaris;
     else
       targetList = listPic;

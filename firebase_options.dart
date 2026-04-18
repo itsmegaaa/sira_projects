@@ -41,49 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDXs6Rso7q1In2T9iTCXCZlnfNXPRN8eRA',
-    appId: '1:991777543724:web:5ef671f4566675b6f72389',
-    messagingSenderId: '991777543724',
-    projectId: 'gabut-a412c',
-    authDomain: 'gabut-a412c.firebaseapp.com',
-    storageBucket: 'gabut-a412c.firebasestorage.app',
-    measurementId: 'G-71E6Z5T6PF',
+    apiKey: 'AIzaSyA8UcxoARGFnvHI8z96eGcIQfQ0CXMma4I',
+    appId: '1:156533796355:web:61ae6f01cf474c2e8c2836',
+    messagingSenderId: '156533796355',
+    projectId: 'sira-projects',
+    authDomain: 'sira-projects.firebaseapp.com',
+    storageBucket: 'sira-projects.firebasestorage.app',
+    measurementId: 'G-WYGSQG90LR',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDIjpLsXVzhupHG-f7KmE4bBrgkhWaBr2U',
-    appId: '1:991777543724:android:b9a7436cfc921ba8f72389',
-    messagingSenderId: '991777543724',
-    projectId: 'gabut-a412c',
-    storageBucket: 'gabut-a412c.firebasestorage.app',
+    apiKey: 'AIzaSyBkFW89L2b4V3AJzwEGMlQGWD1ck6j4Ht0',
+    appId: '1:156533796355:android:e27d8171a2c1bf878c2836',
+    messagingSenderId: '156533796355',
+    projectId: 'sira-projects',
+    storageBucket: 'sira-projects.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDCalqNNjA_WqUUH85Gi0BVx-pp6bSYq7Q',
-    appId: '1:991777543724:ios:a289c0ac046f478df72389',
-    messagingSenderId: '991777543724',
-    projectId: 'gabut-a412c',
-    storageBucket: 'gabut-a412c.firebasestorage.app',
-    iosBundleId: 'com.example.gabutTracker',
+    apiKey: 'AIzaSyCdyQfKIim6q5fcRV0hTdrNJPXBBkka4h4',
+    appId: '1:156533796355:ios:6b59b419517248cf8c2836',
+    messagingSenderId: '156533796355',
+    projectId: 'sira-projects',
+    storageBucket: 'sira-projects.firebasestorage.app',
+    iosBundleId: 'com.example.siraProjects',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDCalqNNjA_WqUUH85Gi0BVx-pp6bSYq7Q',
-    appId: '1:991777543724:ios:a289c0ac046f478df72389',
-    messagingSenderId: '991777543724',
-    projectId: 'gabut-a412c',
-    storageBucket: 'gabut-a412c.firebasestorage.app',
-    iosBundleId: 'com.example.gabutTracker',
+    apiKey: 'AIzaSyCdyQfKIim6q5fcRV0hTdrNJPXBBkka4h4',
+    appId: '1:156533796355:ios:6b59b419517248cf8c2836',
+    messagingSenderId: '156533796355',
+    projectId: 'sira-projects',
+    storageBucket: 'sira-projects.firebasestorage.app',
+    iosBundleId: 'com.example.siraProjects',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDXs6Rso7q1In2T9iTCXCZlnfNXPRN8eRA',
-    appId: '1:991777543724:web:e282489a4c8edd76f72389',
-    messagingSenderId: '991777543724',
-    projectId: 'gabut-a412c',
-    authDomain: 'gabut-a412c.firebaseapp.com',
-    storageBucket: 'gabut-a412c.firebasestorage.app',
-    measurementId: 'G-VMNYJ4VQ72',
+    apiKey: 'AIzaSyA8UcxoARGFnvHI8z96eGcIQfQ0CXMma4I',
+    appId: '1:156533796355:web:89d03616e6b4bff58c2836',
+    messagingSenderId: '156533796355',
+    projectId: 'sira-projects',
+    authDomain: 'sira-projects.firebaseapp.com',
+    storageBucket: 'sira-projects.firebasestorage.app',
+    measurementId: 'G-WKK1PNQH6R',
   );
 
 }

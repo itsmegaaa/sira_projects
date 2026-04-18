@@ -12,7 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:sira_projects/core/utils/globals.dart';
 import 'package:sira_projects/data/repositories/mandiri_repository.dart';
-import 'package:sira_projects/ui/screens/admin/master_data_screen.dart'; // Import layar Master Data
+import 'package:sira_projects/ui/screens/admin/master_data_screen.dart';
 
 class HalamanPengaturan extends StatefulWidget {
   const HalamanPengaturan({super.key});
@@ -24,6 +24,10 @@ class _HalamanPengaturanState extends State<HalamanPengaturan> {
   int _targetSLA = 30;
   String _userRole = 'STAFF';
   bool _isLoadingRole = true;
+
+  // Palet Warna Premium
+  final Color navyColor = const Color(0xFF0A192F);
+  final Color goldAccent = const Color(0xFFC5A059);
 
   @override
   void initState() {
@@ -71,6 +75,36 @@ class _HalamanPengaturanState extends State<HalamanPengaturan> {
     );
   }
 
+  // Fungsi yang dimodifikasi untuk menampilkan peringatan Hubungi Admin
+  void _resetKataSandi() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'INFO KEAMANAN',
+          style: TextStyle(color: navyColor, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Bila Anda ingin melakukan reset password, silakan hubungi Administrator.',
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: navyColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('MENGERTI'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _backupDataJSON() async {
     ScaffoldMessenger.of(
       context,
@@ -110,6 +144,7 @@ class _HalamanPengaturanState extends State<HalamanPengaturan> {
           'PIC Bank',
         ].map((e) => TextCellValue(e)).toList(),
       );
+
       for (var d in allData) {
         sheetObject.appendRow(
           [
@@ -147,7 +182,13 @@ class _HalamanPengaturanState extends State<HalamanPengaturan> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Restore Data'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              'RESTORE DATA',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             content: Text('Upload ${dataBaru.length} data ke Cloud?'),
             actions: [
               TextButton(
@@ -155,6 +196,13 @@ class _HalamanPengaturanState extends State<HalamanPengaturan> {
                 child: const Text('BATAL'),
               ),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: navyColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 onPressed: () async {
                   Navigator.pop(context);
                   final repo = this.context.read<MandiriRepository>();
@@ -180,11 +228,17 @@ class _HalamanPengaturanState extends State<HalamanPengaturan> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
-          'Hapus Semua Data',
-          style: TextStyle(color: Colors.red),
+          'HAPUS SEMUA DATA',
+          style: TextStyle(
+            color: Colors.redAccent,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        content: const Text('Yakin ingin menghapus semua data di Cloud?'),
+        content: const Text(
+          'Yakin ingin menghapus semua data di Cloud? Aksi ini tidak dapat dibatalkan.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -192,8 +246,11 @@ class _HalamanPengaturanState extends State<HalamanPengaturan> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () async {
               Navigator.pop(context);
@@ -212,6 +269,58 @@ class _HalamanPengaturanState extends State<HalamanPengaturan> {
     );
   }
 
+  // --- WIDGET HELPER ---
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 12, top: 16),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: Colors.grey,
+          letterSpacing: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListTile({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    Widget? trailing,
+    VoidCallback? onTap,
+    Color? iconColor,
+  }) {
+    return ListTile(
+      onTap: onTap,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: (iconColor ?? navyColor).withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: iconColor ?? navyColor, size: 20),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: iconColor == Colors.redAccent ? Colors.redAccent : null,
+        ),
+      ),
+      subtitle: subtitle != null
+          ? Text(subtitle, style: const TextStyle(fontSize: 12))
+          : null,
+      trailing:
+          trailing ??
+          (onTap != null
+              ? const Icon(Icons.chevron_right, size: 20, color: Colors.grey)
+              : null),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeCtrl = context.watch<ThemeController>();
@@ -219,50 +328,40 @@ class _HalamanPengaturanState extends State<HalamanPengaturan> {
     bool isAdmin = _userRole == 'ADMIN';
 
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF121212) : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Pengaturan'),
-        backgroundColor: Colors.blueAccent,
+        elevation: 0,
+        title: const Text(
+          'PENGATURAN',
+          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.1),
+        ),
+        backgroundColor: navyColor,
         foregroundColor: Colors.white,
       ),
       body: _isLoadingRole
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: navyColor))
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               children: [
                 // ==========================================
                 // SECTION 1: MASTER DATA (KHUSUS ADMIN)
                 // ==========================================
                 if (isAdmin) ...[
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8, bottom: 8),
-                    child: Text(
-                      'ADMINISTRATOR PANEL',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.indigo,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
+                  _buildSectionHeader('ADMINISTRATOR PANEL'),
                   Card(
-                    elevation: 4,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: const BorderSide(color: Colors.indigo, width: 1),
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: goldAccent.withOpacity(0.5),
+                        width: 1.5,
+                      ),
                     ),
-                    child: ListTile(
-                      leading: const CircleAvatar(
-                        backgroundColor: Colors.indigo,
-                        child: Icon(Icons.storage, color: Colors.white),
-                      ),
-                      title: const Text(
-                        'Kelola Master Data',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: const Text(
-                        'Atur daftar KCU, Notaris, dan PIC Internal',
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
+                    child: _buildListTile(
+                      icon: Icons.storage_rounded,
+                      iconColor: goldAccent,
+                      title: 'Kelola Master Data',
+                      subtitle: 'Atur daftar KCU, Notaris, dan PIC Internal',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -271,102 +370,162 @@ class _HalamanPengaturanState extends State<HalamanPengaturan> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
                 ],
 
                 // ==========================================
                 // SECTION 2: PENGATURAN UMUM
                 // ==========================================
-                const Padding(
-                  padding: EdgeInsets.only(left: 8, bottom: 8),
-                  child: Text(
-                    'PENGATURAN APLIKASI',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
+                _buildSectionHeader('PENGATURAN APLIKASI'),
                 Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
                   child: Column(
                     children: [
-                      SwitchListTile(
-                        title: const Text('Tema Gelap'),
-                        value: isDark,
-                        onChanged: (val) => themeCtrl.toggleTema(val),
-                      ),
-                      const Divider(height: 1),
                       ListTile(
-                        title: const Text('Target SLA'),
-                        trailing: DropdownButton<int>(
-                          value: _targetSLA,
-                          items: [14, 30, 45, 60, 90]
-                              .map(
-                                (int val) => DropdownMenuItem<int>(
-                                  value: val,
-                                  child: Text('$val Hari'),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (val) {
-                            if (val != null) _simpanSLA(val);
-                          },
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: navyColor.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.dark_mode_outlined,
+                            color: navyColor,
+                            size: 20,
+                          ),
+                        ),
+                        title: const Text(
+                          'Tema Gelap',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        trailing: Switch(
+                          value: isDark,
+                          activeColor: goldAccent,
+                          onChanged: (val) => themeCtrl.toggleTema(val),
+                        ),
+                      ),
+                      const Divider(height: 1, indent: 56),
+                      ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: navyColor.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.timer_outlined,
+                            color: navyColor,
+                            size: 20,
+                          ),
+                        ),
+                        title: const Text(
+                          'Target SLA Default',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        trailing: DropdownButtonHideUnderline(
+                          child: DropdownButton<int>(
+                            value: _targetSLA,
+                            icon: Icon(
+                              Icons.keyboard_arrow_down,
+                              color: goldAccent,
+                            ),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: goldAccent,
+                            ),
+                            items: [14, 30, 45, 60, 90].map((int val) {
+                              return DropdownMenuItem<int>(
+                                value: val,
+                                child: Text('$val Hari'),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) _simpanSLA(val);
+                            },
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
 
                 // ==========================================
-                // SECTION 3: MANAJEMEN DATABASE
+                // SECTION 3: KEAMANAN
                 // ==========================================
-                const Padding(
-                  padding: EdgeInsets.only(top: 16, bottom: 8, left: 8),
-                  child: Text(
-                    'MANAJEMEN DATA MANDIRI',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blueAccent,
-                    ),
+                _buildSectionHeader('KEAMANAN AKUN'),
+                Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  child: _buildListTile(
+                    icon: Icons.lock_outline,
+                    title: 'Ganti Kata Sandi',
+                    subtitle: 'Hubungi Administrator untuk reset',
+                    onTap: _resetKataSandi,
                   ),
                 ),
+
+                // ==========================================
+                // SECTION 4: MANAJEMEN DATABASE MANDIRI
+                // ==========================================
+                _buildSectionHeader('MANAJEMEN DATA MANDIRI'),
                 Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
                   child: Column(
                     children: [
-                      ListTile(
-                        leading: const Icon(
-                          Icons.table_chart,
-                          color: Colors.green,
-                        ),
-                        title: const Text('Ekspor Excel Mandiri'),
+                      _buildListTile(
+                        icon: Icons.table_chart_outlined,
+                        iconColor: Colors.green,
+                        title: 'Ekspor Excel Mandiri',
                         onTap: _backupDataExcel,
                       ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: const Icon(Icons.code, color: Colors.orange),
-                        title: const Text('Backup JSON Mandiri'),
+                      const Divider(height: 1, indent: 56),
+                      _buildListTile(
+                        icon: Icons.data_object,
+                        iconColor: Colors.orange,
+                        title: 'Backup JSON Mandiri',
                         onTap: _backupDataJSON,
                       ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: const Icon(Icons.restore, color: Colors.blue),
-                        title: const Text('Restore JSON Mandiri'),
+                      const Divider(height: 1, indent: 56),
+                      _buildListTile(
+                        icon: Icons.restore_page_outlined,
+                        iconColor: Colors.blueAccent,
+                        title: 'Restore JSON Mandiri',
                         onTap: _restoreDataJSON,
                       ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: const Icon(Icons.delete, color: Colors.red),
-                        title: const Text(
-                          'Reset Database Mandiri',
-                          style: TextStyle(color: Colors.red),
-                        ),
+                      const Divider(height: 1, indent: 56),
+                      _buildListTile(
+                        icon: Icons.delete_forever_outlined,
+                        iconColor: Colors.redAccent,
+                        title: 'Reset Database Mandiri',
                         onTap: _hapusSemuaData,
                       ),
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 40),
+                Center(
+                  child: Text(
+                    'Versi 1.0.0 (Laporan Tracker)\nLogin sebagai: $_userRole',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
               ],
             ),
     );

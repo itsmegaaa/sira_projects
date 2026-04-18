@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Tambahan untuk akses langsung KCU
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sira_projects/controllers/master_data_controller.dart';
 import 'package:sira_projects/data/repositories/master_data_repository.dart';
 
@@ -13,6 +13,10 @@ class MasterDataScreen extends StatefulWidget {
 
 class _MasterDataScreenState extends State<MasterDataScreen> {
   late final MasterDataController _c;
+  
+  // Palet Warna Premium
+  final Color navyColor = const Color(0xFF0A192F);
+  final Color goldAccent = const Color(0xFFC5A059);
 
   @override
   void initState() {
@@ -22,7 +26,7 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
   }
 
   // =====================================================================
-  // DIALOG KHUSUS KCU (2 Kolom: Bank & PIC) -> Tembak Langsung ke Firebase
+  // DIALOG KHUSUS KCU (Premium Style)
   // =====================================================================
   void _showAddKcuDialog() {
     final bankCtrl = TextEditingController();
@@ -31,25 +35,29 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Tambah KCU & PIC Bank'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('TAMBAH KCU & PIC', 
+          style: TextStyle(color: navyColor, fontWeight: FontWeight.bold, fontSize: 18)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: bankCtrl,
               textCapitalization: TextCapitalization.characters,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Nama KCU/Bank',
-                hintText: 'Contoh: KCU JAKARTA',
+                labelStyle: TextStyle(color: navyColor),
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: goldAccent)),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             TextField(
               controller: picCtrl,
               textCapitalization: TextCapitalization.characters,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Nama PIC Bank',
-                hintText: 'Contoh: BUDI SANTOSO',
+                labelStyle: TextStyle(color: navyColor),
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: goldAccent)),
               ),
             ),
           ],
@@ -57,13 +65,16 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('BATAL'),
+            child: Text('BATAL', style: TextStyle(color: Colors.grey[600])),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: navyColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
             onPressed: () async {
               if (bankCtrl.text.isEmpty) return;
-
-              // Simpan sebagai Map {Field: String} di doc 'kcu'
               await FirebaseFirestore.instance
                   .collection('master_data')
                   .doc('kcu')
@@ -80,7 +91,7 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
                 );
               }
             },
-            child: const Text('TAMBAH'),
+            child: const Text('SIMPAN'),
           ),
         ],
       ),
@@ -88,30 +99,40 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
   }
 
   // =====================================================================
-  // DIALOG ASLI ANDA UNTUK NOTARIS & PIC (Tetap Dipertahankan)
+  // DIALOG MASTER DATA UMUM (Premium Style)
   // =====================================================================
   void _showAddDialog(String docId, String title) {
     final inputCtrl = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Tambah $title'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('TAMBAH $title', 
+          style: TextStyle(color: navyColor, fontWeight: FontWeight.bold, fontSize: 18)),
         content: TextField(
           controller: inputCtrl,
           textCapitalization: TextCapitalization.characters,
-          decoration: InputDecoration(hintText: 'Masukkan nama $title baru'),
+          decoration: InputDecoration(
+            hintText: 'Masukkan nama $title baru',
+            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: goldAccent)),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('BATAL'),
+            child: Text('BATAL', style: TextStyle(color: Colors.grey[600])),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: navyColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
             onPressed: () {
               _c.tambahItem(docId, inputCtrl.text.trim());
               Navigator.pop(context);
             },
-            child: const Text('TAMBAH'),
+            child: const Text('SIMPAN'),
           ),
         ],
       ),
@@ -123,44 +144,39 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        backgroundColor: Colors.grey[50],
         appBar: AppBar(
+          elevation: 0,
           title: const Text(
-            'Panel Master Data',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            'PANEL MASTER DATA',
+            style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.1),
           ),
-          backgroundColor: Colors.indigo,
+          backgroundColor: navyColor,
           foregroundColor: Colors.white,
-          bottom: const TabBar(
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white54,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold),
-            tabs: [
+          bottom: TabBar(
+            indicatorColor: goldAccent,
+            indicatorWeight: 4,
+            labelColor: goldAccent,
+            unselectedLabelColor: Colors.white60,
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            tabs: const [
               Tab(text: 'KCU/KCP'),
               Tab(text: 'NOTARIS'),
               Tab(text: 'PIC'),
             ],
-            indicatorColor: Colors.white,
           ),
         ),
         body: AnimatedBuilder(
           animation: _c,
           builder: (context, _) {
             if (_c.isLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: CircularProgressIndicator(color: navyColor));
             }
             return TabBarView(
               children: [
-                _buildKcuView(), // Menggunakan View Khusus KCU yang baru
-                _buildListView(
-                  'notaris',
-                  _c.listNotaris,
-                  'NOTARIS',
-                ), // Tetap menggunakan logic Anda
-                _buildListView(
-                  'pic',
-                  _c.listPic,
-                  'PIC',
-                ), // Tetap menggunakan logic Anda
+                _buildKcuView(),
+                _buildListView('notaris', _c.listNotaris, 'NOTARIS'),
+                _buildListView('pic', _c.listPic, 'PIC'),
               ],
             );
           },
@@ -170,7 +186,7 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
   }
 
   // =====================================================================
-  // VIEW KHUSUS KCU (Membaca Field:String dari Firebase)
+  // VIEW KHUSUS KCU (Card Based)
   // =====================================================================
   Widget _buildKcuView() {
     return StreamBuilder<DocumentSnapshot>(
@@ -180,52 +196,43 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData)
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator(color: navyColor));
 
         final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
-        data.remove('lastUpdate'); // Abaikan jika ada timestamp
+        data.remove('lastUpdate');
 
         final listKeys = data.keys.toList()..sort();
 
         return Column(
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: Colors.indigo.withOpacity(0.05),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Total: ${listKeys.length} KCU',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: _showAddKcuDialog, // Memanggil Dialog 2 Kolom
-                    icon: const Icon(Icons.add),
-                    label: const Text('Tambah KCU'),
-                  ),
-                ],
-              ),
-            ),
+            _buildHeaderStats(listKeys.length, 'KCU / KCP', _showAddKcuDialog),
             Expanded(
-              child: ListView.separated(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: listKeys.length,
-                separatorBuilder: (context, index) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final namaBank = listKeys[index];
                   final picBank = data[namaBank];
-                  return ListTile(
-                    title: Text(
-                      namaBank,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                  return Card(
+                    elevation: 0,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: Colors.grey.shade200),
                     ),
-                    subtitle: Text(
-                      'PIC Bank: $picBank',
-                      style: const TextStyle(color: Colors.indigo),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      onPressed: () => _confirmDeleteKcu(namaBank),
+                    child: ListTile(
+                      title: Text(
+                        namaBank,
+                        style: TextStyle(fontWeight: FontWeight.bold, color: navyColor),
+                      ),
+                      subtitle: Text(
+                        'PIC Bank: $picBank',
+                        style: TextStyle(color: goldAccent, fontWeight: FontWeight.w600, fontSize: 13),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                        onPressed: () => _confirmDeleteKcu(namaBank),
+                      ),
                     ),
                   );
                 },
@@ -238,38 +245,29 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
   }
 
   // =====================================================================
-  // VIEW ASLI ANDA UNTUK NOTARIS & PIC (Tetap Dipertahankan)
+  // VIEW MASTER DATA UMUM (Card Based)
   // =====================================================================
   Widget _buildListView(String docId, List<String> data, String title) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          color: Colors.indigo.withOpacity(0.05),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total: ${data.length} Item',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => _showAddDialog(docId, title),
-                icon: const Icon(Icons.add),
-                label: Text('Tambah $title'),
-              ),
-            ],
-          ),
-        ),
+        _buildHeaderStats(data.length, title, () => _showAddDialog(docId, title)),
         Expanded(
-          child: ListView.separated(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: data.length,
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, index) => ListTile(
-              title: Text(data[index]),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.red),
-                onPressed: () => _confirmDelete(docId, data[index]),
+            itemBuilder: (context, index) => Card(
+              elevation: 0,
+              margin: const EdgeInsets.only(bottom: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.grey.shade200),
+              ),
+              child: ListTile(
+                title: Text(data[index], style: TextStyle(color: navyColor, fontWeight: FontWeight.w500)),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  onPressed: () => _confirmDelete(docId, data[index]),
+                ),
               ),
             ),
           ),
@@ -278,22 +276,46 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
     );
   }
 
-  // =====================================================================
-  // FUNGSI HAPUS KHUSUS KCU
-  // =====================================================================
+  // Widget pembantu untuk header agar senada (Pill Style)
+  Widget _buildHeaderStats(int count, String label, VoidCallback onAdd) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.1)),
+              Text('$count Item Terdaftar', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: navyColor)),
+            ],
+          ),
+          ElevatedButton.icon(
+            onPressed: onAdd,
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('TAMBAH'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: navyColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _confirmDeleteKcu(String bankKey) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus KCU?'),
-        content: Text(
-          'Yakin ingin menghapus "$bankKey" beserta PIC-nya dari Master Data?',
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('HAPUS DATA?'),
+        content: Text('Yakin ingin menghapus "$bankKey" dari Master Data?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('BATAL'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('BATAL')),
           TextButton(
             onPressed: () async {
               await FirebaseFirestore.instance
@@ -302,33 +324,28 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
                   .update({bankKey: FieldValue.delete()});
               if (mounted) Navigator.pop(context);
             },
-            child: const Text('HAPUS', style: TextStyle(color: Colors.red)),
+            child: const Text('HAPUS', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  // =====================================================================
-  // FUNGSI HAPUS ASLI ANDA (Tetap Dipertahankan)
-  // =====================================================================
   void _confirmDelete(String docId, String val) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus Item?'),
-        content: Text('Yakin ingin menghapus "$val" dari Master Data?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('HAPUS ITEM?'),
+        content: Text('Yakin ingin menghapus "$val"?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('BATAL'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('BATAL')),
           TextButton(
             onPressed: () {
               _c.hapusItem(docId, val);
               Navigator.pop(context);
             },
-            child: const Text('HAPUS', style: TextStyle(color: Colors.red)),
+            child: const Text('HAPUS', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
