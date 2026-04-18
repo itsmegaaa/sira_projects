@@ -17,6 +17,7 @@ import './pengaturan_screen.dart';
 import 'package:sira_projects/controllers/mandiri_controller.dart';
 import 'package:sira_projects/ui/widgets/order_card.dart';
 import 'package:sira_projects/ui/widgets/stat_pill.dart';
+import 'package:sira_projects/ui/screens/dashboard/log_mandiri_screen.dart'; // IMPORT LAYAR BARU
 
 class MandiriScreen extends StatefulWidget {
   const MandiriScreen({super.key});
@@ -222,7 +223,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
               ),
             ),
             Text(
-              'Manajemen Berkas Notaris',
+              'Manajemen Laporan Mandiri',
               style: TextStyle(
                 fontSize: 11,
                 color: Colors.grey.shade500,
@@ -347,7 +348,6 @@ class _MandiriScreenState extends State<MandiriScreen> {
                     ),
                   ),
 
-                // STAT PILL & SEARCH BAR (Disamakan dengan Bapenda)
                 Container(
                   color: currentSurface,
                   padding: const EdgeInsets.only(bottom: 20),
@@ -465,7 +465,6 @@ class _MandiriScreenState extends State<MandiriScreen> {
                   ),
                 ),
 
-                // LIST ORDER MANDIRI
                 Expanded(
                   child: filteredData.isEmpty
                       ? Center(
@@ -998,15 +997,24 @@ class _MandiriScreenState extends State<MandiriScreen> {
                   child: Divider(height: 30),
                 ),
                 _buildDrawerTitle('AKTIVITAS & BANTUAN'),
+
+                // --- NAVIGASI KE LAYAR LOG MANDIRI YANG BARU ---
                 _buildDrawerItem(
                   Icons.history,
                   'Riwayat Aktivitas Notaris',
                   () {
-                    Navigator.pop(context);
-                    _tampilkanRiwayatLog();
+                    Navigator.pop(context); // Tutup drawer
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LogMandiriScreen(),
+                      ),
+                    );
                   },
                   iconColor: Colors.orange,
                 ),
+
+                // ------------------------------------------------
                 _buildDrawerItem(
                   Icons.settings_outlined,
                   'Pengaturan Target SLA',
@@ -1368,240 +1376,6 @@ class _MandiriScreenState extends State<MandiriScreen> {
       ),
     );
   }
-
-  void _tampilkanRiwayatLog() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        padding: const EdgeInsets.all(24),
-        height: MediaQuery.of(context).size.height * 0.8,
-        child: Column(
-          children: [
-            Container(
-              width: 50,
-              height: 5,
-              margin: const EdgeInsets.only(bottom: 24),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Riwayat Aktivitas',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: navyColor,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, color: Colors.grey),
-                ),
-              ],
-            ),
-            const Divider(height: 30),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('logs_notaris')
-                    .orderBy('waktu', descending: true)
-                    .limit(50)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData)
-                    return const Center(child: CircularProgressIndicator());
-                  var docs = snapshot.data!.docs;
-                  if (docs.isEmpty) return _buildEmptyLog();
-                  return ListView.builder(
-                    itemCount: docs.length,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    itemBuilder: (context, index) => _buildLogItem(
-                      docs[index].data() as Map<String, dynamic>,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLogItem(Map<String, dynamic> log) {
-    String aksi = (log['aksi'] ?? 'INFO').toUpperCase();
-    String detail = log['detail'] ?? '-';
-    String oleh = log['oleh'] ?? 'Sistem';
-    DateTime? waktu = (log['waktu'] as Timestamp?)?.toDate();
-
-    IconData ikon;
-    Color warna;
-    switch (aksi) {
-      case 'TAMBAH':
-        ikon = Icons.add_circle_outline;
-        warna = Colors.green;
-        break;
-      case 'EDIT':
-        ikon = Icons.edit_note;
-        warna = Colors.blue;
-        break;
-      case 'HAPUS':
-        ikon = Icons.delete_forever;
-        warna = Colors.red;
-        break;
-      case 'SELESAI':
-        ikon = Icons.check_circle;
-        warna = Colors.teal;
-        break;
-      case 'APPROVE':
-        ikon = Icons.verified_user;
-        warna = Colors.purple;
-        break;
-      case 'EXPORT':
-        ikon = Icons.file_download;
-        warna = Colors.orange;
-        break;
-      default:
-        ikon = Icons.info_outline;
-        warna = Colors.grey;
-    }
-
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: warna.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(ikon, color: warna, size: 16),
-              ),
-              Expanded(
-                child: Container(
-                  width: 2,
-                  color: Colors.grey.withOpacity(0.15),
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 20, right: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: warna.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          aksi,
-                          style: TextStyle(
-                            color: warna,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        waktu != null ? DateFormat('HH:mm').format(waktu) : '-',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey.shade500,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    detail,
-                    style: const TextStyle(fontSize: 13, height: 1.4),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.person,
-                            size: 12,
-                            color: Colors.grey.shade500,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            oleh,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (waktu != null)
-                        Text(
-                          DateFormat('dd MMM yyyy').format(waktu),
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey.shade400,
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyLog() => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.history_toggle_off, size: 60, color: Colors.grey.shade200),
-        const SizedBox(height: 16),
-        Text(
-          'Belum ada riwayat aktivitas.',
-          style: TextStyle(
-            color: Colors.grey.shade400,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    ),
-  );
 
   Widget _barisDetail(String label, dynamic nilai) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6.0),

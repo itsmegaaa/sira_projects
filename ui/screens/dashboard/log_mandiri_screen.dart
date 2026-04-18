@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
-class LogBapendaScreen extends StatelessWidget {
-  const LogBapendaScreen({super.key});
+class LogMandiriScreen extends StatelessWidget {
+  const LogMandiriScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Penyesuaian tema mode terang / gelap yang selaras dengan aplikasi
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     Color navyColor = const Color(0xFF0F172A);
     Color bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF8FAFC);
@@ -18,7 +17,7 @@ class LogBapendaScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         title: const Text(
-          'Riwayat Aktivitas Bapenda',
+          'Riwayat Aktivitas Notaris',
           style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5),
         ),
         backgroundColor: surfaceColor,
@@ -26,13 +25,10 @@ class LogBapendaScreen extends StatelessWidget {
         iconTheme: IconThemeData(color: isDark ? Colors.white : navyColor),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        // Mengambil log dari Firestore dan diurutkan dari yang paling baru
         stream: FirebaseFirestore.instance
-            .collection('logs_bapenda')
+            .collection('logs_notaris')
             .orderBy('waktu', descending: true)
-            .limit(
-              100,
-            ) // Batasi 100 riwayat terakhir agar aplikasi tetap ringan
+            .limit(100)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -61,7 +57,6 @@ class LogBapendaScreen extends StatelessWidget {
             );
           }
 
-          // Menggunakan ListView.builder layaknya Mandiri Screen
           return ListView.builder(
             padding: const EdgeInsets.only(top: 16, bottom: 40),
             physics: const BouncingScrollPhysics(),
@@ -69,9 +64,7 @@ class LogBapendaScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               var data =
                   snapshot.data!.docs[index].data() as Map<String, dynamic>;
-              return _buildLogItem(
-                data,
-              ); // Memanggil widget UI yang sudah diseragamkan
+              return _buildLogItem(data);
             },
           );
         },
@@ -79,9 +72,6 @@ class LogBapendaScreen extends StatelessWidget {
     );
   }
 
-  // ===========================================================================
-  // WIDGET ITEM TIMELINE (Disalin persis dari desain Mandiri Screen)
-  // ===========================================================================
   Widget _buildLogItem(Map<String, dynamic> log) {
     String aksi = (log['aksi'] ?? 'INFO').toUpperCase();
     String detail = log['detail'] ?? '-';
@@ -124,7 +114,6 @@ class LogBapendaScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Garis Timeline vertikal di sebelah kiri
           Column(
             children: [
               Container(

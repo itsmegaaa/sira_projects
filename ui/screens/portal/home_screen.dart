@@ -11,6 +11,7 @@ import 'package:sira_projects/ui/screens/dashboard/bapenda_screen.dart';
 import 'package:sira_projects/ui/screens/profil/profil_screen.dart';
 import 'package:sira_projects/ui/screens/form/form_mandiri_screen.dart';
 import 'package:sira_projects/ui/screens/form/form_bapenda_screen.dart';
+import 'package:sira_projects/ui/screens/dashboard/pengaturan_screen.dart'; // 👈 Tambahkan baris ini
 
 // =====================================================================
 // KELAS FORMATTER: Untuk Input Kalkulator Rupiah
@@ -240,11 +241,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       child: IconButton(
-                        icon: Icon(
-                          Icons.notifications_none_rounded,
-                          color: currentText,
-                        ),
-                        onPressed: () {},
+                        icon: Icon(Icons.settings_outlined, color: currentText),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HalamanPengaturan(),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
