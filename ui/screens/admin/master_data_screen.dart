@@ -1,3 +1,5 @@
+// ignore_for_file: curly_braces_in_flow_control_structures, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,7 +15,7 @@ class MasterDataScreen extends StatefulWidget {
 
 class _MasterDataScreenState extends State<MasterDataScreen> {
   late final MasterDataController _c;
-  
+
   // Palet Warna Premium
   final Color navyColor = const Color(0xFF0A192F);
   final Color goldAccent = const Color(0xFFC5A059);
@@ -36,8 +38,14 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('TAMBAH KCU & PIC', 
-          style: TextStyle(color: navyColor, fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text(
+          'TAMBAH KCU & PIC',
+          style: TextStyle(
+            color: navyColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -47,7 +55,9 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
               decoration: InputDecoration(
                 labelText: 'Nama KCU/Bank',
                 labelStyle: TextStyle(color: navyColor),
-                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: goldAccent)),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: goldAccent),
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -57,7 +67,9 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
               decoration: InputDecoration(
                 labelText: 'Nama PIC Bank',
                 labelStyle: TextStyle(color: navyColor),
-                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: goldAccent)),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: goldAccent),
+                ),
               ),
             ),
           ],
@@ -71,7 +83,9 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: navyColor,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () async {
               if (bankCtrl.text.isEmpty) return;
@@ -107,14 +121,22 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('TAMBAH $title', 
-          style: TextStyle(color: navyColor, fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text(
+          'TAMBAH $title',
+          style: TextStyle(
+            color: navyColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         content: TextField(
           controller: inputCtrl,
           textCapitalization: TextCapitalization.characters,
           decoration: InputDecoration(
             hintText: 'Masukkan nama $title baru',
-            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: goldAccent)),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: goldAccent),
+            ),
           ),
         ),
         actions: [
@@ -126,7 +148,9 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: navyColor,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () {
               _c.tambahItem(docId, inputCtrl.text.trim());
@@ -223,14 +247,24 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
                     child: ListTile(
                       title: Text(
                         namaBank,
-                        style: TextStyle(fontWeight: FontWeight.bold, color: navyColor),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: navyColor,
+                        ),
                       ),
                       subtitle: Text(
                         'PIC Bank: $picBank',
-                        style: TextStyle(color: goldAccent, fontWeight: FontWeight.w600, fontSize: 13),
+                        style: TextStyle(
+                          color: goldAccent,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
                       ),
                       trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.redAccent,
+                        ),
                         onPressed: () => _confirmDeleteKcu(namaBank),
                       ),
                     ),
@@ -250,7 +284,11 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
   Widget _buildListView(String docId, List<String> data, String title) {
     return Column(
       children: [
-        _buildHeaderStats(data.length, title, () => _showAddDialog(docId, title)),
+        _buildHeaderStats(
+          data.length,
+          title,
+          () => _showAddDialog(docId, title),
+        ),
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -263,9 +301,18 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
                 side: BorderSide(color: Colors.grey.shade200),
               ),
               child: ListTile(
-                title: Text(data[index], style: TextStyle(color: navyColor, fontWeight: FontWeight.w500)),
+                title: Text(
+                  data[index],
+                  style: TextStyle(
+                    color: navyColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.redAccent,
+                  ),
                   onPressed: () => _confirmDelete(docId, data[index]),
                 ),
               ),
@@ -286,8 +333,23 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.1)),
-              Text('$count Item Terdaftar', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: navyColor)),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                  letterSpacing: 1.1,
+                ),
+              ),
+              Text(
+                '$count Item Terdaftar',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: navyColor,
+                ),
+              ),
             ],
           ),
           ElevatedButton.icon(
@@ -315,7 +377,10 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
         title: const Text('HAPUS DATA?'),
         content: Text('Yakin ingin menghapus "$bankKey" dari Master Data?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('BATAL')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('BATAL'),
+          ),
           TextButton(
             onPressed: () async {
               await FirebaseFirestore.instance
@@ -324,7 +389,13 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
                   .update({bankKey: FieldValue.delete()});
               if (mounted) Navigator.pop(context);
             },
-            child: const Text('HAPUS', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'HAPUS',
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -339,13 +410,22 @@ class _MasterDataScreenState extends State<MasterDataScreen> {
         title: const Text('HAPUS ITEM?'),
         content: Text('Yakin ingin menghapus "$val"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('BATAL')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('BATAL'),
+          ),
           TextButton(
             onPressed: () {
               _c.hapusItem(docId, val);
               Navigator.pop(context);
             },
-            child: const Text('HAPUS', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'HAPUS',
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),

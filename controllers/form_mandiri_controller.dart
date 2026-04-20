@@ -1,3 +1,5 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'package:flutter/material.dart';
 import 'package:sira_projects/data/repositories/mandiri_repository.dart';
 
@@ -26,7 +28,7 @@ class FormMandiriController extends ChangeNotifier {
 
   // --- VARIABEL DROPDOWN & MASTER DATA ---
   List<String> listKcu = [];
-  Map<String, String> mapKcuPicBank = {}; // Untuk Auto-fill PIC Bank
+  Map<String, String> mapKcuPicBank = {};
   String? kcuPilihan;
 
   List<String> listPicInternal = [];
@@ -66,27 +68,25 @@ class FormMandiriController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Tarik Master Data dari Firebase
-      // Kami menggunakan getMasterDataMap untuk menangani struktur Key-Value pada KCU
+      // 1. Tarik Master Data berdasarkan struktur master_data/{docId}
       final resKcu = await repo.getMasterDataMap('kcu');
       final resPic = await repo.getMasterDataMap('pic');
       final resNotaris = await repo.getMasterDataMap('notaris');
 
-      // Proses Master Data KCU (Format: { "Nama KCU": "Nama PIC Bank" })
+      // Proses Master Data KCU
       if (resKcu.isNotEmpty) {
-        mapKcuPicBank = resKcu.map(
-          (key, value) => MapEntry(key.trim(), value.toString().trim()),
-        );
+        mapKcuPicBank = {};
+        resKcu.forEach((key, value) {
+          if (key != 'lastUpdate' && value is String) {
+            mapKcuPicBank[key.trim()] = value.trim();
+          }
+        });
         listKcu = mapKcuPicBank.keys.toList()..sort();
       }
 
-      // Proses Master Data PIC & Notaris (Format: { "daftar": [...] })
-      if (resPic.containsKey('daftar')) {
-        listPicInternal = List<String>.from(resPic['daftar'])..sort();
-      }
-      if (resNotaris.containsKey('daftar')) {
-        saranNotaris = List<String>.from(resNotaris['daftar'])..sort();
-      }
+      // Ekstraksi otomatis untuk PIC dan Notaris (Mencegah Dropdown Kosong)
+      listPicInternal = _ekstrakDataMaster(resPic)..sort();
+      saranNotaris = _ekstrakDataMaster(resNotaris)..sort();
 
       // 2. Jika Mode EDIT: Isi Form dengan Data Awal
       if (dataAwal != null) {
@@ -100,18 +100,15 @@ class FormMandiriController extends ChangeNotifier {
         noteCtrl.text = dataAwal['note'] ?? '';
         picBankCtrl.text = dataAwal['picBank'] ?? '';
 
-        // Format angka agar langsung muncul titik ribuan
         limitCtrl.text = _formatAngkaAwal(dataAwal['limit']?.toString());
         nilaiHTCtrl.text = _formatAngkaAwal(dataAwal['nilaiHT']?.toString());
         biayaCtrl.text = _formatAngkaAwal(dataAwal['biaya']?.toString());
 
-        // Parse Tanggal
         tglOrder = _parseDate(dataAwal['tglOrder']);
         tglPelaksanaan = _parseDate(dataAwal['tglPelaksanaan']);
         deadline = _parseDate(dataAwal['deadline']);
         tglBAST = _parseDate(dataAwal['tglBAST']);
 
-        // Amankan Dropdown dari Red Screen
         kcuPilihan = _getSafeDropdown(dataAwal['kcu'], listKcu);
         picInternalPilihan = _getSafeDropdown(
           dataAwal['picInternal'],
@@ -121,13 +118,12 @@ class FormMandiriController extends ChangeNotifier {
         progresPilihan =
             _getSafeDropdown(dataAwal['progres'], listProgres) ?? 'PROSES';
       } else {
-        // Jika Mode TAMBAH BARU
         tglOrder = DateTime.now();
         deadline = tglOrder!.add(Duration(days: targetSLA));
         progresPilihan = 'MENUNGGU APPROVAL';
       }
     } catch (e) {
-      debugPrint("Error inisialisasi: $e");
+      debugPrint("Error inisialisasi master data: $e");
     } finally {
       isLoading = false;
       notifyListeners();
@@ -135,15 +131,33 @@ class FormMandiriController extends ChangeNotifier {
   }
 
   // ===========================================================================
-  // FUNGSI HELPER (FORMATTER & SAFETY)
+  // FUNGSI HELPER (CERDAS & AMAN)
   // ===========================================================================
 
-  // Format angka ke ribuan (1.000.000) untuk inisialisasi awal
+  // Mendeteksi data baik di dalam Field Array maupun di dalam Key dokumen
+  List<String> _ekstrakDataMaster(Map<String, dynamic> dataMap) {
+    if (dataMap.isEmpty) return [];
+
+    // Prioritas 1: Cari field list/array yang umum digunakan
+    for (String key in ['daftar', 'items', 'list', 'data']) {
+      if (dataMap.containsKey(key) && dataMap[key] is List) {
+        return List<String>.from(dataMap[key]);
+      }
+    }
+
+    // Prioritas 2: Ambil field list apa saja yang ditemukan di dokumen
+    for (var value in dataMap.values) {
+      if (value is List) return List<String>.from(value);
+    }
+
+    // Prioritas 3: Jika tidak ada array, ambil Key dokumen (seperti struktur KCU)
+    return dataMap.keys.where((k) => k != 'lastUpdate').toList();
+  }
+
   String _formatAngkaAwal(String? val) {
     if (val == null || val.trim().isEmpty || val == '0') return '';
     String clean = val.replaceAll(RegExp(r'[^0-9]'), '');
     if (clean.isEmpty) return '';
-
     String formatted = '';
     int count = 0;
     for (int i = clean.length - 1; i >= 0; i--) {
@@ -157,17 +171,13 @@ class FormMandiriController extends ChangeNotifier {
     return formatted;
   }
 
-  // Mencegah error jika nilai dari DB tidak ada di list dropdown
   String? _getSafeDropdown(String? valFromDb, List<String> targetList) {
     if (valFromDb == null || valFromDb.trim().isEmpty || valFromDb == '-')
       return null;
     String valClean = valFromDb.trim();
-
     for (var item in targetList) {
       if (item.toUpperCase() == valClean.toUpperCase()) return item;
     }
-
-    // Jika data baru/asing, tambahkan ke list sementara agar tidak crash
     targetList.add(valClean);
     return valClean;
   }
@@ -183,10 +193,9 @@ class FormMandiriController extends ChangeNotifier {
   }
 
   // ===========================================================================
-  // FUNGSI UPDATE STATE (SETTER)
+  // SETTER & LOGIKA BISNIS
   // ===========================================================================
 
-  // AUTO-FILL PIC BANK SAAT KCU DIPILIH
   void setKcu(String? val) {
     kcuPilihan = val;
     if (val != null && mapKcuPicBank.containsKey(val)) {
@@ -201,44 +210,25 @@ class FormMandiriController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateTglPelaksanaan(DateTime dt) {
-    tglPelaksanaan = dt;
-    notifyListeners();
-  }
-
-  void updateDeadline(DateTime dt) {
-    deadline = dt;
-    notifyListeners();
-  }
-
-  void updateTglBAST(DateTime dt) {
-    tglBAST = dt;
-    notifyListeners();
-  }
-
-  void setPicInternal(String? val) {
-    picInternalPilihan = val;
-    notifyListeners();
-  }
-
-  void setJenisOrder(String? val) {
-    jenisPilihan = val;
-    notifyListeners();
-  }
-
-  void setProgres(String val) {
-    progresPilihan = val;
-    notifyListeners();
-  }
+  void updateTglPelaksanaan(DateTime dt) => {
+    tglPelaksanaan = dt,
+    notifyListeners(),
+  };
+  void updateDeadline(DateTime dt) => {deadline = dt, notifyListeners()};
+  void updateTglBAST(DateTime dt) => {tglBAST = dt, notifyListeners()};
+  void setPicInternal(String? val) => {
+    picInternalPilihan = val,
+    notifyListeners(),
+  };
+  void setJenisOrder(String? val) => {jenisPilihan = val, notifyListeners()};
+  void setProgres(String val) => {progresPilihan = val, notifyListeners()};
 
   Future<bool> cekKemungkinanDuplikat() async {
-    if (noSuratCtrl.text.isNotEmpty) {
+    if (noSuratCtrl.text.isNotEmpty)
       return await repo.cekDuplikatNoSurat(noSuratCtrl.text.trim());
-    }
     return false;
   }
 
-  // Menyiapkan Map data untuk dikirim ke MandiriController -> Repository
   Map<String, dynamic> siapkanDataSimpan(String? idAwal) {
     return {
       'id': idAwal ?? repo.generateId(),

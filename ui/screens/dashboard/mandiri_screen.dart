@@ -1,7 +1,8 @@
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use, curly_braces_in_flow_control_structures
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
@@ -12,12 +13,12 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:sira_projects/data/models/mandiri_model.dart';
 import 'package:sira_projects/ui/screens/form/form_mandiri_screen.dart';
-import 'package:sira_projects/ui/screens/dashboard/bapenda_screen.dart';
-import './pengaturan_screen.dart';
 import 'package:sira_projects/controllers/mandiri_controller.dart';
 import 'package:sira_projects/ui/widgets/order_card.dart';
 import 'package:sira_projects/ui/widgets/stat_pill.dart';
-import 'package:sira_projects/ui/screens/dashboard/log_mandiri_screen.dart'; // IMPORT LAYAR BARU
+import 'package:sira_projects/ui/widgets/custom_drawer.dart';
+import 'package:sira_projects/ui/widgets/expandable_fab.dart';
+import 'package:sira_projects/ui/screens/dashboard/log_mandiri_screen.dart';
 
 class MandiriScreen extends StatefulWidget {
   const MandiriScreen({super.key});
@@ -320,7 +321,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
             ),
         ],
       ),
-      drawer: _buatSideMenuBaru(controller, isDark),
+      drawer: const CustomDrawer(activeRoute: 'MANDIRI'),
 
       body: controller.sedangMemuat
           ? Center(child: CircularProgressIndicator(color: goldColor))
@@ -644,33 +645,36 @@ class _MandiriScreenState extends State<MandiriScreen> {
                 ),
               ],
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final res = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FormMandiriScreen(
-                targetSLADefault: controller.targetSLA,
-                userRole: controller.userRole,
-              ),
+      floatingActionButton: ExpandableFab(
+        distance: 110.0,
+        children: [
+          ActionButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LogMandiriScreen()),
             ),
-          );
-          if (res != null) {
-            await controller.simpanOrder(res);
-          }
-        },
-        icon: Icon(Icons.add_rounded, color: goldColor),
-        label: Text(
-          'TAMBAH DATA',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: goldColor,
-            letterSpacing: 1,
+            icon: const Icon(Icons.history_rounded),
+            color: Colors.orange,
           ),
-        ),
-        backgroundColor: navyColor,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ActionButton(
+            onPressed: () async {
+              final res = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FormMandiriScreen(
+                    targetSLADefault: controller.targetSLA,
+                    userRole: controller.userRole,
+                  ),
+                ),
+              );
+              if (res != null) {
+                await controller.simpanOrder(res);
+              }
+            },
+            icon: const Icon(Icons.add_rounded),
+            color: Colors.blue,
+          ),
+        ],
       ),
     );
   }
@@ -914,182 +918,6 @@ class _MandiriScreenState extends State<MandiriScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buatSideMenuBaru(MandiriController controller, bool isDark) {
-    return Drawer(
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(24, 60, 24, 30),
-            width: double.infinity,
-            color: navyColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  backgroundColor: goldColor,
-                  radius: 30,
-                  child: Icon(
-                    Icons.account_balance,
-                    color: navyColor,
-                    size: 30,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  controller.userEmail.isEmpty
-                      ? 'Memuat...'
-                      : controller.userEmail,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Akses: ${controller.userRole}',
-                    style: TextStyle(
-                      color: goldColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              physics: const BouncingScrollPhysics(),
-              children: [
-                _buildDrawerTitle('NAVIGASI'),
-                _buildDrawerItem(Icons.home_rounded, 'Beranda Utama', () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                }),
-                _buildDrawerItem(Icons.domain_rounded, 'Pindah ke Bapenda', () {
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const BapendaScreen(),
-                    ),
-                  );
-                }),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: Divider(height: 30),
-                ),
-                _buildDrawerTitle('AKTIVITAS & BANTUAN'),
-
-                // --- NAVIGASI KE LAYAR LOG MANDIRI YANG BARU ---
-                _buildDrawerItem(
-                  Icons.history,
-                  'Riwayat Aktivitas Notaris',
-                  () {
-                    Navigator.pop(context); // Tutup drawer
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LogMandiriScreen(),
-                      ),
-                    );
-                  },
-                  iconColor: Colors.orange,
-                ),
-
-                // ------------------------------------------------
-                _buildDrawerItem(
-                  Icons.settings_outlined,
-                  'Pengaturan Target SLA',
-                  () async {
-                    Navigator.pop(context);
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HalamanPengaturan(),
-                      ),
-                    );
-                    controller.inisialisasiData();
-                  },
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListTile(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              tileColor: Colors.red.withOpacity(0.05),
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text(
-                'Keluar Aplikasi',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              onTap: () async {
-                Navigator.pop(context);
-                await FirebaseAuth.instance.signOut();
-                if (mounted)
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDrawerTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 10, 24, 10),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: Colors.grey.shade500,
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDrawerItem(
-    IconData icon,
-    String title,
-    VoidCallback onTap, {
-    Color? iconColor,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-      leading: Icon(icon, color: iconColor ?? navyColor, size: 22),
-      title: Text(
-        title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      ),
-      onTap: onTap,
     );
   }
 

@@ -1,18 +1,18 @@
+// ignore_for_file: use_build_context_synchronously, curly_braces_in_flow_control_structures, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:sira_projects/controllers/bapenda_controller.dart';
-import 'package:sira_projects/ui/screens/dashboard/log_bapenda_screen.dart';
 import 'package:sira_projects/ui/screens/form/form_bapenda_screen.dart';
-import 'package:sira_projects/ui/screens/dashboard/mandiri_screen.dart';
-import './pengaturan_screen.dart';
+import 'package:sira_projects/ui/widgets/custom_drawer.dart';
+import 'package:sira_projects/ui/widgets/expandable_fab.dart';
+import 'package:sira_projects/ui/screens/dashboard/log_bapenda_screen.dart';
 
 class BapendaScreen extends StatefulWidget {
   const BapendaScreen({super.key});
@@ -225,7 +225,7 @@ class _BapendaScreenState extends State<BapendaScreen> {
           ),
         ],
       ),
-      drawer: _buatSideMenuBaru(controller, isDark),
+      drawer: const CustomDrawer(activeRoute: 'BAPENDA'),
       body: controller.sedangMemuat
           ? Center(child: CircularProgressIndicator(color: goldColor))
           : Column(
@@ -533,7 +533,9 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                                     BorderRadius.circular(8),
                                               ),
                                               child: Text(
-                                                item.tglBayar,
+                                                _formatTanggalCerdas(
+                                                  item.tglBayar,
+                                                ),
                                                 style: TextStyle(
                                                   fontSize: 10,
                                                   color: Colors.grey.shade600,
@@ -602,55 +604,71 @@ class _BapendaScreenState extends State<BapendaScreen> {
               ],
             ),
 
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final bapendaCtrl = context.read<BapendaController>();
-          final res = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const FormBapendaScreen()),
-          );
-
-          if (res != null) {
-            try {
-              if (mounted)
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Menyimpan data baru...')),
-                );
-              await bapendaCtrl.simpanData(res);
-              if (mounted)
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Data Bapenda berhasil disimpan!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-            } catch (e) {
-              if (mounted)
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text(
-                      'Error',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                    content: Text(e.toString()),
-                  ),
-                );
-            }
-          }
-        },
-        icon: Icon(Icons.add_rounded, color: goldColor),
-        label: Text(
-          'TAMBAH DATA',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: goldColor,
-            letterSpacing: 1,
+      // GANTI FloatingActionButton.extended LAMA DENGAN INI
+      floatingActionButton: ExpandableFab(
+        distance: 110.0,
+        children: [
+          // 1. TOMBOL RIWAYAT (LOG)
+          ActionButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LogBapendaScreen()),
+            ),
+            icon: const Icon(Icons.history_rounded),
+            color: Colors.orange,
           ),
-        ),
-        backgroundColor: navyColor,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+
+          // 2. TOMBOL UNDUH TEMPLATE
+          ActionButton(
+            onPressed: () => _unduhTemplate(),
+            icon: const Icon(Icons.table_view_rounded),
+            color: Colors.green,
+          ),
+
+          // 3. TOMBOL TAMBAH DATA
+          ActionButton(
+            onPressed: () async {
+              final bapendaCtrl = context.read<BapendaController>();
+              final res = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FormBapendaScreen(),
+                ),
+              );
+
+              if (res != null) {
+                try {
+                  if (mounted)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Menyimpan data baru...')),
+                    );
+                  await bapendaCtrl.simpanData(res);
+                  if (mounted)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Data Bapenda berhasil disimpan!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                } catch (e) {
+                  if (mounted)
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text(
+                          'Error',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        content: Text(e.toString()),
+                      ),
+                    );
+                }
+              }
+            },
+            icon: const Icon(Icons.add_rounded),
+            color: Colors.blue,
+          ),
+        ],
       ),
     );
   }
@@ -929,191 +947,36 @@ class _BapendaScreenState extends State<BapendaScreen> {
     );
   }
 
-  Widget _buatSideMenuBaru(BapendaController controller, bool isDark) {
-    final userEmail = FirebaseAuth.instance.currentUser?.email ?? 'Memuat...';
+  // =================================================================
+  // FUNGSI PENERJEMAH TANGGAL CERDAS
+  // =================================================================
+  String _formatTanggalCerdas(String tanggalRaw) {
+    if (tanggalRaw.isEmpty || tanggalRaw == '-') return '-';
 
-    return Drawer(
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(24, 60, 24, 30),
-            width: double.infinity,
-            color: navyColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  backgroundColor: goldColor,
-                  radius: 30,
-                  child: Icon(
-                    Icons.account_balance,
-                    color: navyColor,
-                    size: 30,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  userEmail,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                FutureBuilder<DocumentSnapshot>(
-                  future: FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(userEmail)
-                      .get(),
-                  builder: (context, snapshot) {
-                    String role = 'Memuat...';
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      if (snapshot.hasData && snapshot.data!.exists) {
-                        final data =
-                            snapshot.data!.data() as Map<String, dynamic>?;
-                        role = data?['role'] ?? 'STAFF';
-                      } else {
-                        role = 'STAFF';
-                      }
-                    }
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'Akses: $role',
-                        style: TextStyle(
-                          color: goldColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              physics: const BouncingScrollPhysics(),
-              children: [
-                _buildDrawerTitle('NAVIGASI'),
-                _buildDrawerItem(
-                  Icons.home_rounded,
-                  'Beranda Utama',
-                  () =>
-                      Navigator.of(context).popUntil((route) => route.isFirst),
-                ),
-                _buildDrawerItem(Icons.domain_rounded, 'Pindah ke Mandiri', () {
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MandiriScreen(),
-                    ),
-                  );
-                }),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: Divider(height: 30),
-                ),
+    try {
+      // Skenario 1: Jika formatnya bawaan sistem/Firebase (Contoh: "2026-04-15 00:00:00.000")
+      DateTime parsedDate = DateTime.parse(tanggalRaw);
+      return DateFormat('dd MMM yyyy').format(parsedDate);
+    } catch (e) {
+      try {
+        // Skenario 2: Jika format bawaan Excel manual (Contoh: "15-04-2026" atau "15/04/2026")
+        String cleanDate = tanggalRaw.replaceAll('/', '-');
+        List<String> parts = cleanDate.split('-');
 
-                _buildDrawerTitle('SISTEM'),
-                _buildDrawerItem(Icons.history, 'Riwayat Aktivitas', () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LogBapendaScreen(),
-                    ),
-                  );
-                }, iconColor: Colors.orange),
-                _buildDrawerItem(
-                  Icons.settings_outlined,
-                  'Pengaturan',
-                  () async {
-                    Navigator.pop(context);
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HalamanPengaturan(),
-                      ),
-                    );
-                    controller.mulaiListen();
-                  },
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListTile(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              tileColor: Colors.red.withOpacity(0.05),
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text(
-                'Keluar Aplikasi',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              onTap: () async {
-                Navigator.pop(context);
-                await FirebaseAuth.instance.signOut();
-                if (mounted)
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        if (parts.length == 3) {
+          // Asumsi formatnya Hari-Bulan-Tahun (dd-MM-yyyy)
+          int day = int.parse(parts[0]);
+          int month = int.parse(parts[1]);
+          int year = int.parse(parts[2]);
 
-  Widget _buildDrawerTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 10, 24, 10),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: Colors.grey.shade500,
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDrawerItem(
-    IconData icon,
-    String title,
-    VoidCallback onTap, {
-    Color? iconColor,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-      leading: Icon(icon, color: iconColor ?? navyColor, size: 22),
-      title: Text(
-        title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      ),
-      onTap: onTap,
-    );
+          DateTime manualDate = DateTime(year, month, day);
+          return DateFormat('dd MMM yyyy').format(manualDate);
+        }
+      } catch (e2) {
+        // Jika formatnya benar-benar hancur/tidak dikenali, tampilkan apa adanya daripada error
+        return tanggalRaw;
+      }
+    }
+    return tanggalRaw;
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, curly_braces_in_flow_control_structures
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -220,7 +222,9 @@ class _FormBapendaScreenState extends State<FormBapendaScreen> {
                       _c.nilaiBphtbCtrl,
                       'Nilai BPHTB',
                       isCurrency: true,
-                      readOnly: true,
+                      readOnly: false,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [CurrencyFormat()],
                       isDark: isDark,
                     ),
                     _buildDropdown(
@@ -256,7 +260,9 @@ class _FormBapendaScreenState extends State<FormBapendaScreen> {
                       _c.nilaiPphCtrl,
                       'Nilai PPH',
                       isCurrency: true,
-                      readOnly: true,
+                      readOnly: false,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [CurrencyFormat()],
                       isDark: isDark,
                     ),
                     _buildDropdown(

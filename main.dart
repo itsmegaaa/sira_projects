@@ -20,6 +20,11 @@ import 'package:sira_projects/controllers/bapenda_controller.dart';
 
 // --- IMPOR MASTER DATA ---
 import 'package:sira_projects/data/repositories/master_data_repository.dart';
+import 'package:sira_projects/controllers/user_provider.dart';
+
+// --- BANK TEMPLATE ---
+import 'package:sira_projects/controllers/sertifikat_controller.dart';
+import 'package:sira_projects/data/repositories/sertifikat_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +58,7 @@ void main() async {
           create: (_) => MasterDataRepository(),
         ), // TAMBAHAN INJEKSI MASTER DATA
         // 2. LAYER LOGIKA BISNIS (CONTROLLERS) - Pengolah Data
+        ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider<MandiriController>(
           create: (context) =>
               MandiriController(repo: context.read<MandiriRepository>()),
@@ -60,6 +66,9 @@ void main() async {
         ChangeNotifierProvider<BapendaController>(
           create: (context) =>
               BapendaController(repo: context.read<BapendaRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SertifikatController(repo: SertifikatRepository()),
         ),
       ],
       child: const MyApp(),
