@@ -48,7 +48,8 @@ class _BapendaScreenState extends State<BapendaScreen> {
 
       await file.writeAsString(header + contoh);
 
-      if (mounted) {
+      if (!mounted) return;
+      {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
@@ -63,7 +64,8 @@ class _BapendaScreenState extends State<BapendaScreen> {
         XFile(file.path),
       ], subject: 'Template Import Bapenda');
     } catch (e) {
-      if (mounted) {
+      if (!mounted) return;
+      {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Gagal membuat template.')),
         );
@@ -399,7 +401,8 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                   await context
                                       .read<BapendaController>()
                                       .hapusData(item);
-                                  if (mounted) {
+                                  if (!mounted) return;
+                                  {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
@@ -453,17 +456,17 @@ class _BapendaScreenState extends State<BapendaScreen> {
                                         res,
                                         dataAwal: item,
                                       );
-                                      if (mounted)
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Data Bapenda diperbarui!',
-                                            ),
-                                            backgroundColor: Colors.green,
+                                      if (!mounted) return;
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Data Bapenda diperbarui!',
                                           ),
-                                        );
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
                                     } catch (e) {
                                       if (mounted)
                                         showDialog(
@@ -618,13 +621,6 @@ class _BapendaScreenState extends State<BapendaScreen> {
             color: Colors.orange,
           ),
 
-          // 2. TOMBOL UNDUH TEMPLATE
-          ActionButton(
-            onPressed: () => _unduhTemplate(),
-            icon: const Icon(Icons.table_view_rounded),
-            color: Colors.green,
-          ),
-
           // 3. TOMBOL TAMBAH DATA
           ActionButton(
             onPressed: () async {
@@ -643,13 +639,13 @@ class _BapendaScreenState extends State<BapendaScreen> {
                       const SnackBar(content: Text('Menyimpan data baru...')),
                     );
                   await bapendaCtrl.simpanData(res);
-                  if (mounted)
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Data Bapenda berhasil disimpan!'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Data Bapenda berhasil disimpan!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
                 } catch (e) {
                   if (mounted)
                     showDialog(

@@ -222,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         // PENGGUNAAN FUNGSI _getSapaan() TELAH DIPERBAIKI DI SINI
                         Text(
-                          'Hallo, ${_getSapaan()} 窓',
+                          'Hallo, ${_getSapaan()} 👋',
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -860,6 +860,137 @@ class _HomeScreenState extends State<HomeScreen> {
     Color surfaceColor,
     Color textColor,
   ) {
-    // Implementasi kalkulator pajak dari versi sebelumnya
+    final TextEditingController njopCtrl = TextEditingController();
+    double bphtb = 0;
+    double pph = 0;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Container(
+            padding: EdgeInsets.only(
+              top: 20,
+              left: 24,
+              right: 24,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 30,
+            ),
+            decoration: BoxDecoration(
+              color: surfaceColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(30),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                Text(
+                  "Simulasi Pajak (BPHTB & PPh)",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: textColor,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: njopCtrl,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [CurrencyFormat()],
+                  decoration: InputDecoration(
+                    labelText: "Nilai Transaksi / NJOP",
+                    prefixText: "Rp ",
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onChanged: (val) {
+                    setModalState(() {
+                      double nilai =
+                          double.tryParse(val.replaceAll('.', '')) ?? 0;
+                      // Rumus Standar: (NJOP - NPOPTKP 60jt) * 5%
+                      bphtb = (nilai - 60000000) * 0.05;
+                      if (bphtb < 0) bphtb = 0;
+                      // Rumus PPh: NJOP * 2.5%
+                      pph = nilai * 0.025;
+                    });
+                  },
+                ),
+                const SizedBox(height: 25),
+                _buildHasilPajak("Estimasi BPHTB", bphtb, Colors.orange),
+                const SizedBox(height: 12),
+                _buildHasilPajak("Estimasi PPh", pph, Colors.redAccent),
+                const SizedBox(height: 25),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: navyColor,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text(
+                      "Tutup",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildHasilPajak(String label, double nilai, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontWeight: FontWeight.bold, color: color),
+          ),
+          Text(
+            "Rp ${NumberFormat.currency(locale: 'id', symbol: '', decimalDigits: 0).format(nilai)}",
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: color,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

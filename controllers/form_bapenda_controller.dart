@@ -84,8 +84,6 @@ class FormBapendaController extends ChangeNotifier {
     for (var item in targetList) {
       if (item.toUpperCase() == valClean.toUpperCase()) return item;
     }
-
-    targetList.add(valClean);
     return valClean;
   }
 

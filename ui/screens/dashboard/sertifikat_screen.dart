@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,10 +8,10 @@ import 'package:sira_projects/ui/screens/form/form_sertifikat_screen.dart';
 import 'package:sira_projects/ui/screens/dashboard/log_sertifikat_screen.dart';
 import 'package:sira_projects/ui/widgets/custom_drawer.dart'; // Import Drawer
 import 'package:sira_projects/ui/widgets/expandable_fab.dart'; // Import FAB Baru
+import 'package:sira_projects/controllers/user_provider.dart';
 
 class SertifikatScreen extends StatefulWidget {
-  final String userRole;
-  const SertifikatScreen({super.key, this.userRole = 'STAFF'});
+  const SertifikatScreen({super.key});
   @override
   State<SertifikatScreen> createState() => _SertifikatScreenState();
 }
@@ -188,8 +188,9 @@ class _SertifikatScreenState extends State<SertifikatScreen> {
                           ),
                         ),
                         confirmDismiss: (direction) async {
-                          if (widget.userRole.toUpperCase() != 'ADMIN' &&
-                              widget.userRole.toUpperCase() != 'PIC') {
+                          final roleAsli = context.read<UserProvider>().role;
+                          if (roleAsli.toUpperCase() != 'ADMIN' &&
+                              roleAsli.toUpperCase() != 'PIC') {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
@@ -245,13 +246,27 @@ class _SertifikatScreenState extends State<SertifikatScreen> {
                             },
                           );
                         },
-                        onDismissed: (direction) {
-                          controller.repo.hapusData(item.id);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Data sertifikat berhasil dihapus'),
-                            ),
-                          );
+                        onDismissed: (direction) async {
+                          try {
+                            await controller.hapusData(item.id);
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Data sertifikat berhasil dihapus',
+                                ),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Gagal menghapus: $e'),
+                                backgroundColor: Colors.redAccent,
+                              ),
+                            );
+                          }
                         },
                         child: InkWell(
                           onTap: () {

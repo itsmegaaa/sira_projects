@@ -26,6 +26,7 @@ class BapendaController extends ChangeNotifier {
   List<BapendaModel> listFiltered = [];
   bool sedangMemuat = true;
   bool sedangProsesEkspor = false;
+  bool _isDisposed = false;
 
   // --- VARIABEL FILTER ---
   String kataKunci = '';
@@ -44,6 +45,7 @@ class BapendaController extends ChangeNotifier {
         .streamPekerjaan(limit: 200)
         .listen(
           (snapshot) {
+            if (_isDisposed) return;
             listBapenda = snapshot.docs
                 .map((doc) => BapendaModel.fromFirestore(doc))
                 .toList();
@@ -54,6 +56,7 @@ class BapendaController extends ChangeNotifier {
           onError: (e) {
             debugPrint("Error Bapenda: $e");
             sedangMemuat = false;
+            if (_isDisposed) return;
             notifyListeners();
           },
         );
@@ -61,6 +64,7 @@ class BapendaController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _streamSub?.cancel();
     super.dispose();
   }

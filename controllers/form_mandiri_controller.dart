@@ -210,18 +210,35 @@ class FormMandiriController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateTglPelaksanaan(DateTime dt) => {
-    tglPelaksanaan = dt,
-    notifyListeners(),
-  };
-  void updateDeadline(DateTime dt) => {deadline = dt, notifyListeners()};
-  void updateTglBAST(DateTime dt) => {tglBAST = dt, notifyListeners()};
-  void setPicInternal(String? val) => {
-    picInternalPilihan = val,
-    notifyListeners(),
-  };
-  void setJenisOrder(String? val) => {jenisPilihan = val, notifyListeners()};
-  void setProgres(String val) => {progresPilihan = val, notifyListeners()};
+  void updateTglPelaksanaan(DateTime dt) {
+    tglPelaksanaan = dt;
+    notifyListeners();
+  }
+
+  void updateDeadline(DateTime dt) {
+    deadline = dt;
+    notifyListeners();
+  }
+
+  void updateTglBAST(DateTime dt) {
+    tglBAST = dt;
+    notifyListeners();
+  }
+
+  void setPicInternal(String? val) {
+    picInternalPilihan = val;
+    notifyListeners();
+  }
+
+  void setJenisOrder(String? val) {
+    jenisPilihan = val;
+    notifyListeners();
+  }
+
+  void setProgres(String val) {
+    progresPilihan = val;
+    notifyListeners();
+  }
 
   Future<bool> cekKemungkinanDuplikat() async {
     if (noSuratCtrl.text.isNotEmpty)

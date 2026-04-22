@@ -27,6 +27,7 @@ class MandiriController extends ChangeNotifier {
   List<OrderModel> daftarOrder = []; // MENGGUNAKAN MODEL
   bool sedangMemuat = true;
   bool sedangProsesEkspor = false;
+  bool _isDisposed = false;
 
   String filterStatus = 'SEMUA';
   String filterTahun = 'SEMUA';
@@ -82,7 +83,7 @@ class MandiriController extends ChangeNotifier {
         .streamDataNotaris(limit: 200)
         .listen(
           (snapshot) async {
-            // DESERIALISASI KE MODEL
+            if (_isDisposed) return;
             daftarOrder = snapshot.docs
                 .map((doc) => OrderModel.fromFirestore(doc))
                 .toList();
@@ -115,6 +116,7 @@ class MandiriController extends ChangeNotifier {
           },
           onError: (e) {
             sedangMemuat = false;
+            if (_isDisposed) return;
             notifyListeners();
           },
         );
@@ -122,6 +124,7 @@ class MandiriController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _streamSub?.cancel();
     super.dispose();
   }

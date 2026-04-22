@@ -1,5 +1,6 @@
 // ignore_for_file: curly_braces_in_flow_control_structures
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sira_projects/data/models/sertifikat_model.dart';
 import 'package:sira_projects/data/repositories/sertifikat_repository.dart';
@@ -8,19 +9,35 @@ class SertifikatController extends ChangeNotifier {
   final SertifikatRepository repo;
   SertifikatController({required this.repo});
 
+  StreamSubscription? _streamSub;
   List<SertifikatModel> daftarSertifikat = [];
   bool isLoading = true;
-
-  // Variabel Pencarian & Filter Fisik
   String kataKunci = '';
-  String filterLokasi = 'SEMUA'; // 'SEMUA', 'INTERNAL', 'EKSTERNAL', 'SELESAI'
+  String filterLokasi = 'SEMUA';
 
   void inisialisasiData() {
-    repo.streamData().listen((data) {
-      daftarSertifikat = data;
-      isLoading = false;
-      notifyListeners();
-    });
+    _streamSub?.cancel();
+    _streamSub = repo.streamData().listen(
+      (data) {
+        daftarSertifikat = data;
+        isLoading = false;
+        notifyListeners();
+      },
+      onError: (e) {
+        debugPrint("Error stream sertifikat: $e");
+        isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  Future<void> hapusData(String id) async {
+    try {
+      await repo.hapusData(id);
+    } catch (e) {
+      debugPrint("Error hapus sertifikat: $e");
+      rethrow;
+    }
   }
 
   void setFilterLokasi(String status) {
@@ -33,7 +50,6 @@ class SertifikatController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Logika 90 Hari SLA
   bool cekTelat(SertifikatModel item) {
     if (item.status.toUpperCase() == 'SELESAI' || item.tglMasuk == null)
       return false;
@@ -49,14 +65,12 @@ class SertifikatController extends ChangeNotifier {
 
   List<SertifikatModel> get filteredData {
     return daftarSertifikat.where((item) {
-      // 1. Filter Kata Kunci
       bool cocokKata =
           kataKunci.isEmpty ||
           item.noSertifikat.toLowerCase().contains(kataKunci) ||
           item.pemilik.toLowerCase().contains(kataKunci) ||
           item.desa.toLowerCase().contains(kataKunci);
 
-      // 2. Filter Lokasi Fisik
       bool cocokLokasi = true;
       if (filterLokasi == 'SELESAI') {
         cocokLokasi = item.status.toUpperCase() == 'SELESAI';
@@ -71,5 +85,11 @@ class SertifikatController extends ChangeNotifier {
 
       return cocokKata && cocokLokasi;
     }).toList();
+  }
+
+  @override
+  void dispose() {
+    _streamSub?.cancel();
+    super.dispose();
   }
 }

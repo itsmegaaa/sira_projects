@@ -18,6 +18,10 @@ class MasterDataRepository {
     }
   }
 
+  Future<void> tambahKcu(String namaBank, String picBank) async {
+    await _col.doc('kcu').set({namaBank: picBank}, SetOptions(merge: true));
+  }
+
   // Menyimpan perubahan daftar item kembali ke Firestore
   Future<void> updateListItems(String docId, List<String> items) async {
     await _col.doc(docId).set({

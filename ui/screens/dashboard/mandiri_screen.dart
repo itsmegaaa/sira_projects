@@ -64,10 +64,10 @@ class _MandiriScreenState extends State<MandiriScreen> {
     try {
       await controller.tandaiSelesai(idDokumen, namaDebitur);
     } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal memperbarui status.')),
-        );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal memperbarui status.')),
+      );
     }
   }
 
@@ -76,10 +76,10 @@ class _MandiriScreenState extends State<MandiriScreen> {
     try {
       await controller.hapusData(idDokumen, namaDebitur);
     } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Gagal menghapus data.')));
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal menghapus data.')));
     }
   }
 
@@ -90,10 +90,10 @@ class _MandiriScreenState extends State<MandiriScreen> {
       await controller.tambahHistori(idDokumen, _catatanCtrl.text.trim());
       _catatanCtrl.clear();
     } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal menambah catatan.')),
-        );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal menambah catatan.')));
     }
   }
 
@@ -102,10 +102,10 @@ class _MandiriScreenState extends State<MandiriScreen> {
     try {
       await controller.eksporDanBagikanCSV();
     } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Gagal ekspor data.')));
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal ekspor data.')));
     }
   }
 
@@ -122,13 +122,13 @@ class _MandiriScreenState extends State<MandiriScreen> {
       );
       try {
         int count = await controller.imporExcel(result.files.single);
-        if (mounted)
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Berhasil impor $count data!'),
-              backgroundColor: Colors.green,
-            ),
-          );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Berhasil impor $count data!'),
+            backgroundColor: Colors.green,
+          ),
+        );
       } catch (e) {
         if (mounted)
           ScaffoldMessenger.of(context).showSnackBar(
@@ -153,7 +153,8 @@ class _MandiriScreenState extends State<MandiriScreen> {
 
       await file.writeAsString(header + contoh);
 
-      if (mounted) {
+      if (!mounted) return;
+      {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
@@ -168,10 +169,10 @@ class _MandiriScreenState extends State<MandiriScreen> {
         XFile(file.path),
       ], subject: 'Template Import Mandiri');
     } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal membuat template.')),
-        );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal membuat template.')));
     }
   }
 
@@ -1134,7 +1135,7 @@ class _MandiriScreenState extends State<MandiriScreen> {
                   const SizedBox(height: 16),
                   StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
-                        .collection('data_notaris')
+                        .collection('data_mandiri')
                         .doc(item.id)
                         .collection('histori')
                         .orderBy('waktu', descending: true)
