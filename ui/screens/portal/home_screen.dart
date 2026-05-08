@@ -5,11 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sira_projects/ui/widgets/custom_drawer.dart';
 
 import 'package:sira_projects/controllers/mandiri_controller.dart';
-import 'package:sira_projects/controllers/bapenda_controller.dart';
 import 'package:sira_projects/ui/screens/dashboard/mandiri_screen.dart';
 import 'package:sira_projects/ui/screens/dashboard/bapenda_screen.dart';
 import 'package:sira_projects/ui/screens/profil/profil_screen.dart';
@@ -111,44 +109,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final Color goldColor = const Color(0xFFD4AF37);
   final Color surfaceColor = Colors.white;
 
-  @override
-  void initState() {
-    super.initState();
-    ambilRoleUser();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<MandiriController>().inisialisasiData();
-      context.read<BapendaController>().mulaiListen();
-    });
-  }
-
-  String roleAktif = "Loading...";
-
-  void ambilRoleUser() async {
-    final user = FirebaseAuth.instance.currentUser;
-    // Tambahan pengaman: pastikan user dan emailnya tidak kosong (null)
-    if (user != null && user.email != null) {
-      try {
-        var doc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.email)
-            .get();
-
-        // Pastikan layar masih aktif sebelum mengubah tampilan
-        if (mounted) {
-          setState(() {
-            roleAktif = doc.data()?['role'] ?? 'STAFF';
-          });
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            roleAktif = 'STAFF'; // Jika gagal ambil data, jadikan STAFF
-          });
-        }
-      }
-    }
-  }
-
   String _getSapaan() {
     var jam = DateTime.now().hour;
     if (jam >= 3 && jam < 11) return 'Selamat Pagi';
@@ -223,10 +183,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         // PENGGUNAAN FUNGSI _getSapaan() TELAH DIPERBAIKI DI SINI
                         Text(
                           'Hallo, ${_getSapaan()} 👋',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: Color.fromARGB(255, 0, 0, 0),
+                            color: currentText,
                           ),
                         ),
                         Text(

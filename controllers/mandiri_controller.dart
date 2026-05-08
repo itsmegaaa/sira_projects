@@ -26,6 +26,7 @@ class MandiriController extends ChangeNotifier {
   StreamSubscription? _streamSub;
   List<OrderModel> daftarOrder = []; // MENGGUNAKAN MODEL
   bool sedangMemuat = true;
+  bool isDataDariCache = false;
   bool sedangProsesEkspor = false;
   bool _isDisposed = false;
 
@@ -84,20 +85,27 @@ class MandiriController extends ChangeNotifier {
         .listen(
           (snapshot) async {
             if (_isDisposed) return;
+
+            // DETEKSI CACHE
+            isDataDariCache = snapshot.metadata.isFromCache;
+
             daftarOrder = snapshot.docs
                 .map((doc) => OrderModel.fromFirestore(doc))
                 .toList();
+
             sedangMemuat = false;
             notifyListeners();
 
+            // LOGIKA NOTIFIKASI SLA & TELAT
             int jumlahWarning = 0, jumlahTelat = 0;
             for (var item in daftarOrder) {
               if (item.progres != 'SELESAI') {
                 int sisa = hitungSisaHari(item);
-                if (sisa < 0)
+                if (sisa < 0) {
                   jumlahTelat++;
-                else if (sisa <= 3)
+                } else if (sisa <= 3) {
                   jumlahWarning++;
+                }
               }
             }
 
@@ -106,6 +114,7 @@ class MandiriController extends ChangeNotifier {
               String tglTerakhirNotif = prefs.getString('terakhir_notif') ?? '';
               String tglHariIni = DateTime.now().toString().substring(0, 10);
               if (tglTerakhirNotif != tglHariIni) {
+                // Pemanggilan NotifikasiService ada di sini
                 await NotifikasiService.tampilkanNotif(
                   '⚠️ Laporan Notaris',
                   'Ada $jumlahWarning berkas H-3 SLA dan $jumlahTelat berkas TELAT.',
@@ -117,6 +126,7 @@ class MandiriController extends ChangeNotifier {
           onError: (e) {
             sedangMemuat = false;
             if (_isDisposed) return;
+            debugPrint("Stream error Firestore: $e");
             notifyListeners();
           },
         );

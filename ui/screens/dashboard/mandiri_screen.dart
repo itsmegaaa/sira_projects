@@ -6,10 +6,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import 'package:sira_projects/data/models/mandiri_model.dart';
 import 'package:sira_projects/ui/screens/form/form_mandiri_screen.dart';
@@ -29,7 +29,7 @@ class MandiriScreen extends StatefulWidget {
 class _MandiriScreenState extends State<MandiriScreen> {
   final TextEditingController _catatanCtrl = TextEditingController();
   bool _isOnline = true;
-  StreamSubscription<List<ConnectivityResult>>? _connSub;
+  StreamSubscription<InternetStatus>? _connSub;
 
   // Palet Warna Premium Clean UI
   final Color navyColor = const Color(0xFF0F172A);
@@ -51,11 +51,14 @@ class _MandiriScreenState extends State<MandiriScreen> {
       context.read<MandiriController>().inisialisasiData();
     });
 
-    _connSub = Connectivity().onConnectivityChanged.listen((
-      List<ConnectivityResult> result,
+    _connSub = InternetConnection().onStatusChange.listen((
+      InternetStatus status,
     ) {
-      if (mounted)
-        setState(() => _isOnline = !result.contains(ConnectivityResult.none));
+      if (mounted) {
+        setState(() {
+          _isOnline = status == InternetStatus.connected;
+        });
+      }
     });
   }
 
@@ -203,7 +206,10 @@ class _MandiriScreenState extends State<MandiriScreen> {
     bool isAdmin = controller.userRole == 'ADMIN';
     bool isPIC = controller.userRole == 'PIC';
     bool canApprove = isAdmin || isPIC;
-    bool canEdit = true;
+    bool canEdit =
+        controller.userRole == 'ADMIN' ||
+        controller.userRole == 'PIC' ||
+        controller.userRole == 'STAFF';
 
     return Scaffold(
       backgroundColor: currentBg,
@@ -340,6 +346,28 @@ class _MandiriScreenState extends State<MandiriScreen> {
                         SizedBox(width: 8),
                         Text(
                           'Tidak Ada Koneksi Internet',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                if (controller.isDataDariCache && _isOnline)
+                  Container(
+                    width: double.infinity,
+                    color: Colors.orange.shade700,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.cloud_off, color: Colors.white, size: 14),
+                        SizedBox(width: 8),
+                        Text(
+                          'Menampilkan data tersimpan (Gagal sinkronisasi)',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 12,
@@ -1036,20 +1064,18 @@ class _MandiriScreenState extends State<MandiriScreen> {
                     ),
                   ),
                   onPressed: () async {
+                    final messenger = ScaffoldMessenger.of(context);
                     Navigator.pop(context);
                     try {
                       await controller.approveBerkas(item.id, item.debitur);
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         const SnackBar(
-                          content: Text('Berkas di-Approve!'),
-                          backgroundColor: Colors.green,
+                          content: Text('Berkas berhasil disetujui'),
                         ),
                       );
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Gagal melakukan Approve!'),
-                        ),
+                      messenger.showSnackBar(
+                        SnackBar(content: Text('Gagal menyetujui berkas: $e')),
                       );
                     }
                   },

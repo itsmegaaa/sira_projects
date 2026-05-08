@@ -35,7 +35,7 @@ class NotifikasiService {
 
     // PERBAIKAN: Menggunakan named parameters untuk method show()
     await _notifPlugin.show(
-      id: 0,
+      id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
       title: judul,
       body: isi,
       notificationDetails: detail,

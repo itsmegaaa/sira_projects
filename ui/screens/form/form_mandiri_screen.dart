@@ -409,10 +409,7 @@ class _FormOrderScreenState extends State<FormMandiriScreen> {
                     ),
                     _buildTextField(
                       'Rincian Order',
-                      _c.rincianCtrl
-                        ..text = _c.rincianCtrl.text.isEmpty
-                            ? 'SHM'
-                            : _c.rincianCtrl.text,
+                      _c.rincianCtrl,
                       isTitleCase: true,
                       isDark: isDark,
                     ),
@@ -652,11 +649,7 @@ class _FormOrderScreenState extends State<FormMandiriScreen> {
                   ? TextCapitalization.words
                   : TextCapitalization.none),
         keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        inputFormatters: [
-          if (isUpperCase) UpperCaseTextFormatter(),
-          if (isTitleCase) TitleCaseTextFormatter(),
-          if (isNumber) CurrencyFormatIdr(),
-        ],
+        inputFormatters: [if (isNumber) CurrencyFormatIdr()],
         decoration: InputDecoration(
           labelText: isRequired ? '$label *' : label,
           prefixText: isNumber ? 'Rp ' : null,

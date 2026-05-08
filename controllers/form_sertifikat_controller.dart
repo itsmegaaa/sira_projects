@@ -75,14 +75,17 @@ class FormSertifikatController extends ChangeNotifier {
   // FUNGSI HELPER
   // ===========================================================================
   String? _getSafeDropdown(String? valFromDb, List<String> targetList) {
-    if (valFromDb == null || valFromDb.trim().isEmpty || valFromDb == '-')
+    if (valFromDb == null || valFromDb.trim().isEmpty || valFromDb == '-') {
       return null;
+    }
+
     String valClean = valFromDb.trim();
     for (var item in targetList) {
-      if (item.toUpperCase() == valClean.toUpperCase()) return item;
+      if (item.toUpperCase() == valClean.toUpperCase()) {
+        return item;
+      }
     }
-    targetList.add(valClean);
-    return valClean;
+    return null;
   }
 
   DateTime? _parseDate(dynamic dateStr) {

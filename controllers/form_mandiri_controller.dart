@@ -9,6 +9,26 @@ class FormMandiriController extends ChangeNotifier {
 
   bool isLoading = true;
 
+  // Fungsi Helper untuk merubah teks menjadi Title Case
+  String _toTitleCase(String text) {
+    if (text.isEmpty) return text;
+    StringBuffer newText = StringBuffer();
+    bool isNextUpper = true;
+    for (int i = 0; i < text.length; i++) {
+      String char = text[i];
+      if (char == ' ' || char == '\n' || char == '-') {
+        isNextUpper = true;
+        newText.write(char);
+      } else if (isNextUpper) {
+        newText.write(char.toUpperCase());
+        isNextUpper = false;
+      } else {
+        newText.write(char.toLowerCase());
+      }
+    }
+    return newText.toString();
+  }
+
   // --- CONTROLLER TEKS ---
   final debiturCtrl = TextEditingController();
   final notarisCtrl = TextEditingController();
@@ -121,6 +141,7 @@ class FormMandiriController extends ChangeNotifier {
         tglOrder = DateTime.now();
         deadline = tglOrder!.add(Duration(days: targetSLA));
         progresPilihan = 'MENUNGGU APPROVAL';
+        rincianCtrl.text = 'SHM';
       }
     } catch (e) {
       debugPrint("Error inisialisasi master data: $e");
@@ -172,14 +193,17 @@ class FormMandiriController extends ChangeNotifier {
   }
 
   String? _getSafeDropdown(String? valFromDb, List<String> targetList) {
-    if (valFromDb == null || valFromDb.trim().isEmpty || valFromDb == '-')
+    if (valFromDb == null || valFromDb.trim().isEmpty || valFromDb == '-') {
       return null;
+    }
+
     String valClean = valFromDb.trim();
     for (var item in targetList) {
-      if (item.toUpperCase() == valClean.toUpperCase()) return item;
+      if (item.toUpperCase() == valClean.toUpperCase()) {
+        return item;
+      }
     }
-    targetList.add(valClean);
-    return valClean;
+    return null;
   }
 
   DateTime? _parseDate(dynamic dateStr) {
@@ -248,18 +272,22 @@ class FormMandiriController extends ChangeNotifier {
 
   Map<String, dynamic> siapkanDataSimpan(String? idAwal) {
     return {
-      'id': idAwal ?? repo.generateId(),
-      'debitur': debiturCtrl.text.trim(),
+      // TERAPKAN .toUpperCase() DI SINI
+      'debitur': debiturCtrl.text.trim().toUpperCase(),
+      'noSurat': noSuratCtrl.text.trim().toUpperCase(),
+      'covernote': covernoteCtrl.text.trim().toUpperCase(),
+      'perKasus': perKasusCtrl.text.trim().toUpperCase(),
+      'note': noteCtrl.text.trim().toUpperCase(),
+
+      // TERAPKAN _toTitleCase() DI SINI
+      'rincian': _toTitleCase(rincianCtrl.text.trim()),
+
+      // Sisanya biarkan seperti biasa
       'notaris': notarisCtrl.text.trim(),
-      'noSurat': noSuratCtrl.text.trim(),
-      'covernote': covernoteCtrl.text.trim(),
-      'rincian': rincianCtrl.text.trim(),
       'limit': limitCtrl.text.replaceAll(RegExp(r'[^0-9]'), ''),
       'nilaiHT': nilaiHTCtrl.text.replaceAll(RegExp(r'[^0-9]'), ''),
       'biaya': biayaCtrl.text.replaceAll(RegExp(r'[^0-9]'), ''),
       'progresKeterangan': progresKeteranganCtrl.text.trim(),
-      'perKasus': perKasusCtrl.text.trim(),
-      'note': noteCtrl.text.trim(),
       'picBank': picBankCtrl.text.trim(),
       'tglOrder': tglOrder?.toIso8601String() ?? '',
       'tglPelaksanaan': tglPelaksanaan?.toIso8601String() ?? '',
